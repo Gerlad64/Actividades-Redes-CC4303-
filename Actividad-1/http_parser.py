@@ -5,8 +5,12 @@ from dataclasses import dataclass
 
 @dataclass
 class HTTP:
-    """ dataclass HttpParsed
+    """ dataclass HTTP
     clase de datos que almacena una petición/respuesta http válida parseada
+    Attributes:
+        start_line (str): La línea de inicio del protocolo HTTP
+        headers (dict[str, str]): Diccionario que almacena el head, mapea el tipo de header con su contenido
+        body (str): El cuerpo de la respuesta HTTP en texto plano.
     """
     start_line: str
     headers: dict[str, str]
@@ -17,6 +21,12 @@ class HTTP:
 
     @classmethod
     def parse_from_bytes(cls, http_message: bytes) -> HTTP:
+        """ Parsea los bytes de un mensaje HTTP
+        Args:
+            http_message (bytes): bytes del mensaje HTTP
+        Returns:
+            HTTP: El mensaje HTTP parseado en un objeto :class:`HTTP`
+        """
         decoded_http_message: str = http_message.decode()
         parsed_by_rn = decoded_http_message.split("\r\n")
 
@@ -42,6 +52,14 @@ class HTTP:
         return HTTP( start_line, headers, body )
 
     def create_message(self) -> str:
+        """ método para crear un mensaje http válido
+
+        Crea y retorna un mensaje http a partir de los datos
+        `start_line` `headers` y `body` almacenados en el objeto HTTP.
+
+        Dado que los datos almacenados en el objeto son válidos, el mensaje retornado
+        también lo será.
+        """
         # Une los strings de la lista resultante con \r\n
         # supone que content no tiene espacios ni saltos de linea al inicio
         return (
