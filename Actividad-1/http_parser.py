@@ -10,7 +10,7 @@ class HTTP:
     """
     start_line: str
     headers: dict[str, str]
-    html: str
+    body: str
 
     def __post_init__(self):
         pass
@@ -29,7 +29,7 @@ class HTTP:
             raise Exception(r"Missing \r\n before body")
 
         start_line = parsed_by_rn[0]
-        html = parsed_by_rn[-1]
+        body = parsed_by_rn[-1]
 
         # * función lambda genera [h, c], 'h' a la izquierda de ':', 'c' a la derecha
         #   si no es capaz de hacer split, el header no es válido
@@ -39,7 +39,7 @@ class HTTP:
             parsed_by_rn[1:-2]
         ))
 
-        return HTTP( start_line, headers, html )
+        return HTTP( start_line, headers, body )
 
     def create_message(self) -> str:
         # Une los strings de la lista resultante con \r\n
@@ -47,8 +47,8 @@ class HTTP:
         return (
                 "\r\n".join(
                     [self.start_line] +
-                    [ header + ": " + content for header, content in self.headers ] +
-                    ["\r\n", self.html]
+                    [ header + ": " + content for header, content in self.headers.items() ] +
+                    ["\r\n", self.body]
                 )
         )
 
