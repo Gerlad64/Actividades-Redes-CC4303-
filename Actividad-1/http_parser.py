@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from http_exceptions import InvalidHTTPMessage
+
 
 @dataclass
 class HTTP:
@@ -29,14 +31,13 @@ class HTTP:
         """
         decoded_http_message: str = http_message.decode()
         parsed_by_rn = decoded_http_message.split("\r\n")
-
-        # Como mínimo, start_line, \r\n, un html
+        # Como mínimo: start_line\r\n\r\n --> [start_line, '', '']
         if len(parsed_by_rn) < 3:
-            raise Exception("Unexpected HTTP message")
+            raise InvalidHTTPMessage(f"Unexpected HTTP message. Received:\n {decoded_http_message}")
 
-        # Penúltimo elemento existe y debe ser \r\n
-        if parsed_by_rn[-2] != "\r\n":
-            raise Exception(r"Missing \r\n before body")
+        # Penúltimo elemento existe y debe ser ''
+        if parsed_by_rn[-2] != '':
+            raise InvalidHTTPMessage(f"Missing \\r\\n\\r\\n before body. Received:\n {decoded_http_message}")
 
         start_line = parsed_by_rn[0]
         body = parsed_by_rn[-1]
