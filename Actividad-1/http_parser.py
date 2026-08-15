@@ -22,7 +22,7 @@ class HTTP:
         pass
 
     @classmethod
-    def parse_from_bytes(cls, http_message: bytes) -> HTTP:
+    def from_bytes(cls, http_message: bytes) -> HTTP:
         """ Parsea los bytes de un mensaje HTTP
         Args:
             http_message (bytes): bytes del mensaje HTTP

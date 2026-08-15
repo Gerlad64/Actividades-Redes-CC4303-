@@ -34,5 +34,5 @@ if __name__ == '__main__':
     while True:
         new_socket, new_addr = tcp_socket.accept()
         head_bytes: bytes = recv_head(new_socket, 4)
-        http_req: HTTP = HTTP.parse_from_bytes(head_bytes)
+        http_req: HTTP = HTTP.from_bytes(head_bytes)
         print("Received Request:", http_req.create_message(), sep='\n')
