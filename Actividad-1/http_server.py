@@ -1,5 +1,6 @@
 import socket
 from http_parser import HTTP
+from config import *
 
 
 def recv_full_msg(conn_socket: socket.socket, buff_size: int, end: str) -> bytes:
@@ -23,16 +24,28 @@ def recv_full_msg(conn_socket: socket.socket, buff_size: int, end: str) -> bytes
 def recv_head(conn_socket: socket.socket, buff_size: int) -> bytes:
     return recv_full_msg(conn_socket, buff_size, "\r\n\r\n")
 
+with open(HTML_PATH, "r", encoding='utf-8') as html_file:
+    html = html_file.read()
+
+HTTP_RESPONSE: HTTP = HTTP.from_html(html)
+HTTP_RESPONSE.headers["Server"] = SERVER_NAME
+HTTP_RESPONSE.headers["Connection"] = SERVER_CONNECTION
+
 if __name__ == '__main__':
 
     tcp_socket: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    address = ('10.192.1.3', 8080)
-    tcp_socket.bind(address)
+    tcp_socket.bind(SERVER_ADDRESS)
 
-    tcp_socket.listen(3)
+    tcp_socket.listen(SERVER_WORKERS)
 
     while True:
         new_socket, new_addr = tcp_socket.accept()
-        head_bytes: bytes = recv_head(new_socket, 4)
+        head_bytes: bytes = recv_head(new_socket, SERVER_BUFFER_SIZE)
         http_req: HTTP = HTTP.from_bytes(head_bytes)
         print("Received Request:", http_req.create_message(), sep='\n')
+
+        response_msg = HTTP_RESPONSE.create_message()
+        print("Sending Response:", response_msg.split('\r\n\r\n', 1)[0], sep='\n')
+        new_socket.send(response_msg.encode())
+        print("Closing connection")
+        new_socket.close()
