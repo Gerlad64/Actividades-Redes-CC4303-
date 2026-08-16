@@ -22,6 +22,15 @@ class HTTP:
         pass
 
     @classmethod
+    def from_html(cls, html: str, status_code: int = 200, phrase: str = "OK") -> HTTP:
+        start_line = f"HTTP/1.1 {status_code} {phrase}"
+        headers = {
+            "Content-Type": "text/html; charset=utf-8",
+            "Content-Length": str(len(html.encode()))
+        }
+        return cls(start_line, headers, html)
+
+    @classmethod
     def from_bytes(cls, http_message: bytes) -> HTTP:
         """ Parsea los bytes de un mensaje HTTP
         Args:
