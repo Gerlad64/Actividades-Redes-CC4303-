@@ -19,7 +19,26 @@ class HTTP:
     body: str
 
     def __post_init__(self):
-        pass
+        """ Rutina post-inicialización que asegura que `start_line`, `headers` sean válidos según
+        el protocolo HTTP.
+
+        :return:
+        """
+        prohibited_chars: list[str] = ["\r", "\n"]
+        found_header = [c for c in prohibited_chars if c in self.headers.keys()]
+        found_content = [c for c in prohibited_chars if c in self.headers.values()]
+
+        for header, content in self.headers.items():
+            if found_header:
+                found = ", ".join(repr(f) for f in found_header)
+                raise InvalidHTTPMessage(f"{found} found in header: {repr(header)}")
+            if found_content:
+                found = ", ".join(repr(f) for f in found_content)
+                raise InvalidHTTPMessage(f"{found} found in header: {repr(content)}")
+
+        self.headers = {
+            k.strip(): v.strip() for k, v in self.headers.items()
+        }
 
     @classmethod
     def from_html(cls, html: str, status_code: int = 200, phrase: str = "OK") -> HTTP:
