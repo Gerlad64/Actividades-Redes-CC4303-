@@ -27,16 +27,16 @@ class HTTP:
         :return:
         """
         prohibited_chars: list[str] = ["\r", "\n"]
-        found_header = [c for c in prohibited_chars if c in self.headers.keys()]
+        found_header = [c for c in prohibited_chars if c in self.headers]
         found_content = [c for c in prohibited_chars if c in self.headers.values()]
 
         for header, content in self.headers.items():
             if found_header:
                 found = ", ".join(repr(f) for f in found_header)
-                raise InvalidHTTPMessage(f"{found} found in header: {repr(header)}")
+                raise InvalidHTTPMessage(f"{found} found in header: {header!r}")
             if found_content:
                 found = ", ".join(repr(f) for f in found_content)
-                raise InvalidHTTPMessage(f"{found} found in header: {repr(content)}")
+                raise InvalidHTTPMessage(f"{found} found in header: {content!r}")
 
         self.headers = {
             k.strip(): v.strip() for k, v in self.headers.items()
