@@ -1,0 +1,5 @@
+{
+  "user": "cj@rockstar-games.com",
+  "blocked": ["www.dcc.uchile.cl", "cc4303.bachmann.cl/secret", "www.tiktok.com"],
+  "forbidden_words": [{"proxy": "[REDACTED]"}, {"DCC": "[FORBIDDEN]"}, {"biblioteca": "[???]"}]
+}
