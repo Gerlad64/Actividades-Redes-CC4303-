@@ -42,6 +42,15 @@ class HTTP:
 
     @classmethod
     def from_html(cls, html: str, status_code: int = 200, phrase: str = "OK") -> HTTP:
+        """ Crea un mensaje HTTP a partir de un documento html
+        Args:
+            html: (str): string con el documento html
+            status_code (int, optional): El código de estado de la respuesta HTTP
+            phrase (str, optional): Frase después del código de estado de la respuesta
+        Returns:
+            HTTP: Objeto HTTP con `start_line` inicializado como `HTTP/1.1 {status_code} {phrase}`, `headers`
+            con Content-Type y Content-Lenght inicializados según el html y `body` contiene el `html`
+        """
         start_line = f"HTTP/1.1 {status_code} {phrase}"
         headers = {
             "Content-Type": "text/html; charset=utf-8",
