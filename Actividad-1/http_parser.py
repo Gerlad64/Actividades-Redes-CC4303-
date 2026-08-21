@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import socket
 from dataclasses import dataclass
 
 from http_exceptions import InvalidHTTPMessage
+from socket_utils import recv_head, recv_n_bytes
 
 
 @dataclass
@@ -89,6 +91,35 @@ class HTTP:
 
         return HTTP( start_line, headers, body )
 
+    @classmethod
+    def from_request(cls, conn_socket: socket.socket, buff_size: int) -> HTTP:
+        """ Recibe una solicitud HTTP del socket tcp de la conexión
+        y retorna un objeto HTTP.
+
+        Returns:
+            La solicitud HTTP *parseada* en el objeto HTTP. Si los headers incluyen
+            `Content-Length`, entonces, se retorna el objeto con el parámetro `body`
+            inicializado con el contenido del cuerpo recibido.
+        """
+        # se reciben los headers, con la posibilidad de recibir parte
+        # del body (mirar docstring recv_head)
+        head_bytes, body_bytes = recv_head(conn_socket, buff_size)
+        # se crea objeto HTTP para la request
+        http = cls.from_bytes(head_bytes)
+
+        # Se recibe el cuerpo HTTP si Content-Length está en los headers
+        if "Content-Length" in http.headers:
+            body_remainder: bytes = recv_n_bytes(
+                conn_socket,
+                buff_size,
+                nbytes=int(http.headers["Content-Length"]) - len(body_bytes)
+            )[0]
+            http.body = (body_bytes + body_remainder).decode()
+            print("------body-------")
+            print(http.body)
+
+        return http
+
     def create_message(self) -> str:
         """ método para crear un mensaje http válido
 
@@ -107,5 +138,24 @@ class HTTP:
                     ["\r\n", self.body]
                 )
         )
+    def send_to(self, conn_socket: socket.socket, address: tuple[str, int], buffer_size: int) -> HTTP:
+        """ Establece una conexión tcp y manda un mensaje HTTP con los datos guardados en el objeto.
+        Retorna un objeto HTTP con la respuesta del mensaje.
 
+        **Consideraciones**:
+            - El socket **no** debe tener una conexión activa
+            - La conexión **no** es cerrada al finalizar la función
+            - Se agrega (o **sobreescribe**) el header "Host" con la direción (ip y puerto) en `address`
+
+        Args:
+            conn_socket: Socket tcp. Este socket **no** debe tener una conexión activa al llamar a este método.
+            address: dirección donde se mandará la solicitud
+            buffer_size: tamaño del buffer de recepción
+        """
+        conn_socket.connect(address)
+        self.headers["Host"] = f"{address[0]}:{address[1]}"
+        conn_socket.send(self.create_message().encode())
+        http_response = HTTP.from_request(conn_socket, buffer_size)
+
+        return http_response
 
