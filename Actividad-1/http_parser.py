@@ -41,6 +41,7 @@ class HTTP:
         self.headers = {
             k.strip(): v.strip() for k, v in self.headers.items()
         }
+        self.start_line = self.start_line.strip()
 
     @classmethod
     def from_html(cls, html: str, status_code: int = 200, phrase: str = "OK") -> HTTP:
