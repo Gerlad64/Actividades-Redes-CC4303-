@@ -10,6 +10,23 @@ import sys
 with open(HTML_PATH, "r", encoding='utf-8') as html_file:
     html = html_file.read()
 
+with open(STATUS_404_PATH, "r", encoding='utf-8') as html_file:
+    STATUS_404 = html_file.read()
+
+with open(STATUS_403_PATH, "r", encoding='utf-8') as html_file:
+    STATUS_403 = html_file.read()
+
+STATUS_403 = STATUS_403.replace(
+    'src="/',
+    f'src="http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}/'
+)
+
+STATUS_404 = STATUS_404.replace(
+    'src="/',
+    f'src="http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}/'
+
+)
+
 proxy_config: ProxyConfig = ProxyConfig.from_path_to_json(PROXY_JSON_PATH)
 headers = {
     "Connection": SERVER_CONNECTION,
