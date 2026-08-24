@@ -14,11 +14,38 @@ class HTTP:
     Attributes:
         start_line (str): La línea de inicio del protocolo HTTP
         headers (dict[str, str]): Diccionario que almacena el head, mapea el tipo de header con su contenido
-        body (str): El cuerpo de la respuesta HTTP en texto plano.
+        _body (str | bytes): El cuerpo de la respuesta HTTP en texto plano o bytes.
     """
     start_line: str
     headers: dict[str, str]
-    body: str
+    _body: str | bytes
+
+    @property
+    def body(self) -> str:
+        """ Accede al cuerpo del mensaje HTTP cuando contiene texto plano """
+        if isinstance(self._body, str):
+            return self._body
+        raise TypeError(
+            "No puedes acceder a '.body' porque contiene datos binarios (bytes)"
+            "Usa la propiedad '.body_bytes' en su lugar."
+        )
+    @body.setter
+    def body(self, body: str) -> None:
+        """ Setter de la propiedad body. Se usa para colocar texto plano en el body HTTP"""
+        self._body = body
+
+    @property
+    def body_bytes(self) -> bytes:
+        """ Accede al cuerpo del mensaje HTTP cuando contiene bytes """
+        if isinstance(self._body, bytes):
+            return self._body
+
+        return self._body.encode()
+
+    @body_bytes.setter
+    def body_bytes(self, body: bytes) -> None:
+        """ Setter de la propiedad body. Se usa para colocar bytes en el body HTTP """
+        self._body = body
 
     def __post_init__(self):
         """ Rutina post-inicialización que asegura que `start_line`, `headers` sean válidos según
