@@ -231,6 +231,14 @@ class HTTP:
                     ["\r\n", self.body]
                 )
         )
+    def create_message_bytes(self) -> bytes:
+        return (
+                "\r\n".join(
+                    [self.start_line] +
+                    [ header + ": " + content for header, content in self.headers.items() ] +
+                    ["\r\n"]
+                ).encode() + self.body_bytes
+        )
     def send_to(self, conn_socket: socket.socket, address: tuple[str, int], buffer_size: int) -> HTTP:
         """ Establece una conexión tcp y manda un mensaje HTTP con los datos guardados en el objeto.
         Retorna un objeto HTTP con la respuesta del mensaje.
