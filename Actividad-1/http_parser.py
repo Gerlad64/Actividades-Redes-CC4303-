@@ -2,10 +2,22 @@ from __future__ import annotations
 
 import socket
 from dataclasses import dataclass
+from pathlib import Path
 
 from http_exceptions import InvalidHTTPMessage
 from socket_utils import recv_head, recv_n_bytes
 
+MIME_TYPES = {
+        "html": "text/html",
+        "txt": "text/plain",
+        "css": "text/css",
+        "js": "application/javascript",
+        "png": "image/png",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "gif": "image/gif",
+        "json": "application/json"
+}
 
 @dataclass
 class HTTP:
@@ -87,6 +99,59 @@ class HTTP:
             "Content-Length": str(len(html.encode()))
         }
         return cls(start_line, headers, html)
+
+    @classmethod
+    def from_file(cls, path: Path, not_found_html: str | None = None, raise_error = False) -> HTTP:
+        """ Crea un mensaje HTTP a partir de un archivo
+        Detecta el tipo de archivo y asigna un Content-Type adecuado.
+
+        **todo**: Manejar cuando el archivo no es encontrado
+
+        Args:
+            path: Ruta al archivo
+            not_found_html: (str | None) Página html a mostrar si no se encuentra el archivo
+            raise_error: bool, si es True, entonces se lanzará un error si no se encuentra un archivo en `path`
+        Returns:
+            HTTP: Objeto HTTP con `start_line` inicializado como `HTTP/1.1 {status_code} {phrase}`, `headers`
+            con Content-Type y Content-Lenght inicializados según el archivo y `body` contiene su contenido.
+        """
+        try:
+            # 1. Seguimos leyendo en binario ('rb') porque si no, los .png darán error
+            with open(path, 'rb') as f:
+                body = f.read()
+
+            # 2. Extraer la extensión manualmente usando operaciones de string
+            path_str = str(path)
+            if "." in path_str:
+                # rsplit('.', 1) corta por el último punto que encuentre
+                ext = path_str.rsplit(".", 1)[-1].lower()
+            else:
+                ext = ""
+
+            # 3. Buscar en el diccionario. Si no existe, usamos octet-stream (binario genérico)
+            content_type = MIME_TYPES.get(ext, "application/octet-stream")
+
+            start_line = "HTTP/1.1 200 OK"
+            headers = {
+                "Content-Type": content_type,
+                "Content-Length": str(len(body))
+            }
+
+            return cls(start_line=start_line, headers=headers, _body=body)
+
+        except FileNotFoundError:
+            if raise_error:
+                raise FileNotFoundError(f"No existe archivo {path}")
+            if not_found_html is not None:
+                return cls.from_html(not_found_html, 404, "Not Found")
+
+            body = b"<h1>404 - Archivo no encontrado</h1>"
+            start_line = "HTTP/1.1 404 Not Found"
+            headers = {
+                "Content-Type": "text/html; charset=utf-8",
+                "Content-Length": str(len(body))
+            }
+            return cls(start_line=start_line, headers=headers, _body=body)
 
     @classmethod
     def from_bytes(cls, http_message: bytes) -> HTTP:
