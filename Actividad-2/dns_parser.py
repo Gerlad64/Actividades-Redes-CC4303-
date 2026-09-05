@@ -157,15 +157,15 @@ class Question(ctypes.BigEndianStructure):
 
 class ResourceRecord(ctypes.BigEndianStructure):
     """ Clase `ResourceRecord`, hereda de BigEndianStructure"""
-    atype:    int
-    aclass:   int
+    rtype:    int
+    rclass:   int
     ttl:      int
     rdlength: int
 
     _pack_ = 1
     _fields_ = [
-        ("atype", ctypes.c_uint16),
-        ("aclass", ctypes.c_uint16),
+        ("rtype", ctypes.c_uint16),
+        ("rclass", ctypes.c_uint16),
         ("ttl", ctypes.c_uint32),
         ("rdlength", ctypes.c_uint16),
     ]
