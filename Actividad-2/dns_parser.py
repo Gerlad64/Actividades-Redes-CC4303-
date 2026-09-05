@@ -90,7 +90,6 @@ class Header(ctypes.BigEndianStructure):
             
         return Header.from_buffer_copy(dns_bytes, offset)
 
-h = Header.from_buffer_copy(b'\x00\x0a\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
  
 class Question(ctypes.BigEndianStructure):
     """ Clase `Question`, hereda de ctypes.BigEndianStructure
@@ -99,7 +98,7 @@ class Question(ctypes.BigEndianStructure):
         que le corresponden, mientras que `qname` contiene una cantidad de bits
         variable, dependiendo del dominio consultado.
     """
-    qtype: int
+    qtype:  int
     qclass: int
     
     _fields_ = [
@@ -190,7 +189,7 @@ class Answer(ctypes.BigEndianStructure):
             + bytes(memoryview(self))
             + self.rddta
         )
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         return bytes(self)
 
     @classmethod
