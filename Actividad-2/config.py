@@ -6,7 +6,7 @@ BASE_DIR: Path = Path(__file__).parent
 SERVER_IP = '10.192.1.3'
 SERVER_PORT = 8080
 SERVER_ADDRESS: tuple[str, int] = (SERVER_IP, SERVER_PORT)
-SERVER_BUFFER_SIZE: int = 4
+SERVER_BUFFER_SIZE: int = 5000
 
 
 
