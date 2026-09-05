@@ -17,7 +17,7 @@ class Header(ctypes.BigEndianStructure):
     """
     qr: int
     """ size: **1 bit** 
-        Señala si el mensaje es *question* o *answer*.
+        Señala si el mensaje es *question* o *ResourceRecord*.
     """
     opcode: int
     """ size: **4 bits** 
@@ -155,12 +155,12 @@ class Question(ctypes.BigEndianStructure):
         return question
 
 
-class Answer(ctypes.BigEndianStructure):
-    """ Clase `Answer`, hereda de BigEndianStructure"""
-    atype: int
-    aclass: int
-    ttl: int
-    rdlenght: int
+class ResourceRecord(ctypes.BigEndianStructure):
+    """ Clase `ResourceRecord`, hereda de BigEndianStructure"""
+    atype:    int
+    aclass:   int
+    ttl:      int
+    rdlength: int
 
     
     _fields_ = [
@@ -210,9 +210,11 @@ class Answer(ctypes.BigEndianStructure):
           
 @dataclass
 class DNS:
-    header: Header
-    question: Question
-    answer: Answer | None
+    header:     Header
+    question:   Question
+    answer:     ResourceRecord | None
+    authority:  ResourceRecord | None
+    additional: ResourceRecord | None
 
     def to_bytes(self) -> bytes:
         answer = b'' if self.answer is None else self.answer.to_bytes()
