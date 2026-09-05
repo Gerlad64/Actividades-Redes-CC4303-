@@ -226,13 +226,24 @@ class DNS:
     additional: ResourceRecord | None
 
     def to_bytes(self) -> bytes:
-        answer = b'' if self.answer is None else self.answer.to_bytes()
-        return self.header.to_bytes() + self.question.to_bytes() + answer
+        answer     = b'' if self.answer is None else self.answer.to_bytes()
+        authority  = b'' if self.authority is None else self.authority.to_bytes()
+        additional = b'' if self.additional is None else self.additional.to_bytes()
+        return self.header.to_bytes() + self.question.to_bytes() + answer + authority + additional
 
     @classmethod
     def from_bytes(cls, dns_bytes: bytes) -> DNS:
         h = Header.from_bytes(dns_bytes)
         q = Question.from_bytes(dns_bytes, len(h.to_bytes()))
-        qlen = len(q.to_bytes()) + len(h.to_bytes())
-        a = None if len(dns_bytes) == qlen else Answer.from_bytes(dns_bytes, qlen)
-        return cls(h, q, a)
+        # ------Answer
+        # largo acumulado del mensaje mientras es parseado
+        acc_len = len(q.to_bytes()) + len(h.to_bytes()) 
+        a = None if h.ancount == 0 else ResourceRecord.from_bytes(dns_bytes, acc_len)
+        acc_len += 0 if a is None else len(a.to_bytes())
+        # ------Authority
+        auth = None if h.nscount == 0 else ResourceRecord.from_bytes(dns_bytes, acc_len)
+        acc_len += 0 if auth is None else len(auth.to_bytes())
+        #------Additional
+        addt = None if h.arcount == 0 else ResourceRecord.from_bytes(dns_bytes, acc_len)
+        
+        return cls(h, q, a, auth, addt)
