@@ -162,7 +162,7 @@ class ResourceRecord(ctypes.BigEndianStructure):
     ttl:      int
     rdlength: int
 
-    
+    _pack_ = 1
     _fields_ = [
         ("atype", ctypes.c_uint16),
         ("aclass", ctypes.c_uint16),
@@ -193,20 +193,29 @@ class ResourceRecord(ctypes.BigEndianStructure):
         return bytes(self)
 
     @classmethod
-    def from_bytes(cls, dns_bytes: bytes, offset: int = 0) -> Answer:
-       if len(dns_bytes) - offset < 12: # name + type + ... + rdlength
-           raise Exception("Expected at least 12 bytes") 
-
-#        if (dns_bytes[offset] & 0xC0) != 0xC0:
-#            raise NotImplementedError(
-#                "Not implemented when the first two bits of name are not b11 (i.e. name is not a pointer)"
-#            )
-           
-       answer = cls.from_buffer_copy(dns_bytes, offset + 2)
-       answer.name = dns_bytes[offset:offset + 2]
-       answer.rddta = dns_bytes[offset + 12: offset + 12 + answer.rdlength]
-
-       return answer
+    def from_bytes(cls, dns_bytes: bytes, offset: int = 0) -> ResourceRecord:
+        if len(dns_bytes) - offset < 11: # name + type + ... + rdlength
+            raise Exception(f"Expected at least 12 bytes. Received: {len(dns_bytes) - offset}") 
+        elif len(dns_bytes) - offset == 11:
+            assert dns_bytes[offset] == 0
+            
+        if (dns_bytes[offset] & 0xC0) == 0xC0: # campo name es un *compression pointer*
+            name = dns_bytes[offset:offset + 2]
+            name_off = 2
+        else: 
+            name_end = dns_bytes.find(b'\x00', offset) + 1
+            name = dns_bytes[offset: name_end]
+            name_off = 1
+            
+        rr = cls.from_buffer_copy(dns_bytes, offset + name_off)
+        rr.name = name
+        if memoryview(dns_bytes)[offset+10+name_off-1] != rr.rdlength:
+            rr.rddta = dns_bytes[offset + 10+name_off:]
+            
+        else:
+            rr.rddta = dns_bytes[offset + 10+name_off: offset + 10+name_off + rr.rdlength]
+       
+        return rr
           
 @dataclass
 class DNS:
