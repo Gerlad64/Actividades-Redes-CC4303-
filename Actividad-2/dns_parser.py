@@ -3,6 +3,7 @@ from __future__ import annotations
 import ctypes
 import socket
 from dataclasses import dataclass
+from enum import Enum
 
 
 class Header(ctypes.BigEndianStructure):
@@ -155,6 +156,12 @@ class Question(ctypes.BigEndianStructure):
         question.qname = qname
         return question
 
+class RegisterType(Enum):
+    A     = 1
+    AAAA  = 28
+    CNAME = 5
+    NS    = 2
+    SOA   = 6
 
 class ResourceRecord(ctypes.BigEndianStructure):
     """ Clase `ResourceRecord`, hereda de BigEndianStructure"""
@@ -183,6 +190,20 @@ class ResourceRecord(ctypes.BigEndianStructure):
             Retorna el entero correspondiente a los 14 bits siguientes a b11
         """
         return ((self.name[0] & 0x3F) << 8) | self.name[1]
+
+    def rtype_is(self, register: str) -> bool:
+        """ Chequea si el tipo de registro almacenado en `rtype` corresponde al registro
+            especificado por nombre en mayúsculas.
+
+            Args:
+                register (str): Tipo de registro en mayúsculas, por ejemplo, `"A"`
+            Returns:
+                True si el registro `register` corresponde al registro guardado en `self.rtype`.
+                False si no corresponde o si se pasó un registro que no reconocido.
+        """
+        if register in RegisterType:
+            return self.rtype == RegisterType[register]
+        return False
 
     def __bytes__(self) -> bytes:
         return (
