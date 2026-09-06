@@ -305,6 +305,21 @@ class DNS:
         addt = None if h.arcount == 0 else ResourceRecord.from_bytes(dns_bytes, offset)
         return cls(h, q, a, auth, addt)
 
+    @classmethod
+    def from_socket(cls, dns_bytes: bytes, ip: str, port: int = 53, buff_size: int = 4060) -> DNS:
+        addr = (ip, port)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+                # usamos binascii para pasar el mensaje al formato apropiado
+                # y lo enviamos
+                sock.sendto(dns_bytes, addr)
+                # En data quedará la respuesta a nuestra consulta
+                data, _ = sock.recvfrom(buff_size)
+        finally:
+                sock.close()
+            # Ojo que los datos de la respuesta van en hexadecimal, no en binario
+        return DNS.from_bytes(data)
+
     def send(self, ip: str, port: int = 53, buff_size: int = 4096) -> bytes:
         addr = (ip, port)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
