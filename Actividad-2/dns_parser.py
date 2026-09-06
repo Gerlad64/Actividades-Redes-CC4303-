@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes
+import socket
 from dataclasses import dataclass
 
 
@@ -245,5 +246,18 @@ class DNS:
         acc_len += 0 if auth is None else len(auth.to_bytes())
         #------Additional
         addt = None if h.arcount == 0 else ResourceRecord.from_bytes(dns_bytes, acc_len)
-        
         return cls(h, q, a, auth, addt)
+
+    def send(self, ip: str, port: int = 53, buff_size: int = 4096) -> bytes:
+        addr = (ip, port)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+                # usamos binascii para pasar el mensaje al formato apropiado
+                # y lo enviamos
+                sock.sendto(self.to_bytes(), addr)
+                # En data quedará la respuesta a nuestra consulta
+                data, _ = sock.recvfrom(buff_size)
+        finally:
+                sock.close()
+            # Ojo que los datos de la respuesta van en hexadecimal, no en binario
+        return data
