@@ -275,31 +275,34 @@ class ResourceRecord(ctypes.BigEndianStructure):
 @dataclass
 class DNS:
     header:     Header
-    question:   Question
+    question:   Question | None
     answer:     ResourceRecord | None
     authority:  ResourceRecord | None
     additional: ResourceRecord | None
 
     def to_bytes(self) -> bytes:
+        question   = b'' if self.question is None else self.question.to_bytes()
         answer     = b'' if self.answer is None else self.answer.to_bytes()
         authority  = b'' if self.authority is None else self.authority.to_bytes()
         additional = b'' if self.additional is None else self.additional.to_bytes()
-        return self.header.to_bytes() + self.question.to_bytes() + answer + authority + additional
+        return self.header.to_bytes() + question + answer + authority + additional
 
     @classmethod
     def from_bytes(cls, dns_bytes: bytes) -> DNS:
         h = Header.from_bytes(dns_bytes)
-        q = Question.from_bytes(dns_bytes, len(h.to_bytes()))
-        # ------Answer
+        # ------Question
         # largo acumulado del mensaje mientras es parseado
-        acc_len = len(q.to_bytes()) + len(h.to_bytes()) 
-        a = None if h.ancount == 0 else ResourceRecord.from_bytes(dns_bytes, acc_len)
-        acc_len += 0 if a is None else len(a.to_bytes())
+        offset = len(h.to_bytes())
+        q = None if h.qdcount == 0 else Question.from_bytes(dns_bytes, offset)
+        offset += 0 if q is None else len(q.to_bytes())
+        # ------Answer
+        a = None if h.ancount == 0 else ResourceRecord.from_bytes(dns_bytes, offset)
+        offset += 0 if a is None else len(a.to_bytes())
         # ------Authority
-        auth = None if h.nscount == 0 else ResourceRecord.from_bytes(dns_bytes, acc_len)
-        acc_len += 0 if auth is None else len(auth.to_bytes())
+        auth = None if h.nscount == 0 else ResourceRecord.from_bytes(dns_bytes, offset)
+        offset += 0 if auth is None else len(auth.to_bytes())
         #------Additional
-        addt = None if h.arcount == 0 else ResourceRecord.from_bytes(dns_bytes, acc_len)
+        addt = None if h.arcount == 0 else ResourceRecord.from_bytes(dns_bytes, offset)
         return cls(h, q, a, auth, addt)
 
     def send(self, ip: str, port: int = 53, buff_size: int = 4096) -> bytes:
@@ -319,7 +322,7 @@ class DNS:
     def copy(self) -> DNS:
         return DNS(
             header    = self.header.copy(),
-            question  = self.question.copy(),
+            question  = None if self.question is None else self.question.copy(),
             answer    = None if self.answer is None else self.answer.copy(),
             authority = None if self.authority is None else self.authority.copy(),
             additional= None if self.additional is None else self.additional.copy()
