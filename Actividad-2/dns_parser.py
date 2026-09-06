@@ -91,6 +91,22 @@ class Header(ctypes.BigEndianStructure):
             raise Exception("Expected 12 bytes")
             
         return Header.from_buffer_copy(dns_bytes, offset)
+        
+    def copy(self) -> Header:
+        return Header(
+            id=self.id,
+            qr=self.qr,
+            opcode=self.opcode,
+            aa=self.aa,
+            tc=self.tc,
+            rd=self.rd,
+            ra=self.ra,
+            z=self.z,
+            rcode=self.rcode,
+            qdcount=self.qdcount,
+            anscount=self.anscount,
+            arcount=self.arcount
+        )
 
  
 class Question(ctypes.BigEndianStructure):
@@ -155,6 +171,13 @@ class Question(ctypes.BigEndianStructure):
         question = cls.from_buffer_copy(dns_bytes, name_end) # Question con qtype y qclass asignados
         question.qname = qname
         return question
+        
+    def copy(self) -> Question:
+        return Question(
+            qname=self.qname,
+            qtype=self.qtype,
+            qclass=self.qclass
+        )
 
 class RegisterType(Enum):
     A     = 1
@@ -238,6 +261,16 @@ class ResourceRecord(ctypes.BigEndianStructure):
             rr.rddta = dns_bytes[offset + 10+name_off: offset + 10+name_off + rr.rdlength]
        
         return rr
+
+    def copy(self) -> ResourceRecord:
+        return ResourceRecord(
+            name=self.name,
+            rddta=self.rddta,
+            rtype=self.rtype,
+            rclass=self.rclass,
+            ttl=self.ttl,
+            rdlength=self.rdlength
+        )
           
 @dataclass
 class DNS:
@@ -282,3 +315,12 @@ class DNS:
                 sock.close()
             # Ojo que los datos de la respuesta van en hexadecimal, no en binario
         return data
+
+    def copy(self) -> DNS:
+        return DNS(
+            header    = self.header.copy(),
+            question  = self.question.copy(),
+            answer    = None if self.answer is None else self.answer.copy(),
+            authority = None if self.authority is None else self.authority.copy(),
+            additional= None if self.additional is None else self.additional.copy()
+        )
