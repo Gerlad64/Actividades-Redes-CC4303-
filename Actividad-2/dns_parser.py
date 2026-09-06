@@ -104,7 +104,7 @@ class Header(ctypes.BigEndianStructure):
             z=self.z,
             rcode=self.rcode,
             qdcount=self.qdcount,
-            anscount=self.anscount,
+            ancount=self.ancount,
             arcount=self.arcount
         )
 
@@ -165,7 +165,7 @@ class Question(ctypes.BigEndianStructure):
             offset (int): índice que indica donde a comenzar a leer dns_bytes
         """
         if len(dns_bytes) - offset < 3:
-            raise Exception("Expected at least 3 bytes")
+            raise Exception(f"Expected at least 3 bytes. Received: {len(dns_bytes) - offset}")
         name_end = dns_bytes.find(b'\x00', offset) + 1       # Índice donde finaliza qname
         qname = dns_bytes[offset:name_end]                   # qname encontrado
         question = cls.from_buffer_copy(dns_bytes, name_end) # Question con qtype y qclass asignados
@@ -224,8 +224,8 @@ class ResourceRecord(ctypes.BigEndianStructure):
                 True si el registro `register` corresponde al registro guardado en `self.rtype`.
                 False si no corresponde o si se pasó un registro que no reconocido.
         """
-        if register in RegisterType:
-            return self.rtype == RegisterType[register]
+        if register in RegisterType.__dict__:
+            return self.rtype == RegisterType[register].value
         return False
 
     def __bytes__(self) -> bytes:
