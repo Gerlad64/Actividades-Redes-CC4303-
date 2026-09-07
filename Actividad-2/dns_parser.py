@@ -223,7 +223,11 @@ class Question(ctypes.BigEndianStructure):
 
         return qname
     
-    def __setattr__(self, name, value):
+    def __setattr__(self, name, value) -> None:
+        """ Sobrescribe la asignación de atributos del objeto.
+            Si el atributo a modificar es `qname` y se entrega un `str`,
+            lo convierte automáticamente a formato `bytes`.
+        """
         if name == "qname" and isinstance(value, str): # asigna qname con un dominio
             value = self._qname_from_str(value)
                 
@@ -259,18 +263,37 @@ class Question(ctypes.BigEndianStructure):
         )
 
 class RegisterType(Enum):
+    """ Enum `RegisterType` 
+        Define los valores enteros correspondientes a los distintos
+        tipos de registros DNS más comunes.
+    """
     A     = 1
+    """Registro de dirección IPv4"""
     AAAA  = 28
+    """Registro de dirección IPv6"""
     CNAME = 5
+    """Registro de nombre canónico (canonical name)"""
     NS    = 2
+    """Registro de servidor de nombres (name server)"""
     SOA   = 6
+    """Registro de inicio de autoridad"""
 
 class ResourceRecord(ctypes.BigEndianStructure):
-    """ Clase `ResourceRecord`, hereda de BigEndianStructure"""
+    """ Clase `ResourceRecord`, hereda de BigEndianStructure
+        Almacena un campo *Resource Record* de un mensaje dns,
+        como un *answer*, *authority* o *additional*, donde
+        cada campo del *rr* contiene la cantidad de bits que le
+        corresponde, a excepción de `name`  y `rddta` que son de
+        largo variable.
+    """
     rtype:    int
+    """Tipo de registro almacenado en `rddta`"""
     rclass:   int
+    """ clase del *resource record*"""
     ttl:      int
+    """tiempo de vida del registro"""
     rdlength: int
+    """Cantidad de bytes almacenados en `rddta`"""
 
     _pack_ = 1
     _fields_ = [
@@ -279,10 +302,12 @@ class ResourceRecord(ctypes.BigEndianStructure):
         ("ttl", ctypes.c_uint32),
         ("rdlength", ctypes.c_uint16),
     ]
-    def __init__(self, name: bytes = b'\xC0\x00', rddta: bytes = b'', *args, **kwargs):
+    def __init__(self, name: bytes = b'\xC0\x00', rddta: bytes = b'', *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.name: bytes = name
+        """Nombre de dominio del host"""
         self.rddta: bytes = rddta if rddta != b'' else bytes(self.rdlength)
+        """ datos del resource record"""
 
 
     @property
@@ -318,8 +343,17 @@ class ResourceRecord(ctypes.BigEndianStructure):
 
     @classmethod
     def from_bytes(cls, dns_bytes: bytes, offset: int = 0) -> ResourceRecord:
+        """ Crea un objeto `ResourceRecord` a partir de los bytes de un mensaje dns.
+            El tamaño del mensaje a partir del offset debe ser de mínimo 11 bytes.
+
+            Args:
+                dns_bytes (bytes): Un mensaje dns que contiene el registro.
+                offset (int): Offset que indica dónde comenzar a leer `dns_bytes`.
+            Returns:
+                Un objeto ResourceRecord instanciado con los datos parseados.
+        """
         if len(dns_bytes) - offset < 11: # name + type + ... + rdlength
-            raise Exception(f"Expected at least 12 bytes. Received: {len(dns_bytes) - offset}") 
+            raise Exception(f"Expected at least 11 bytes. Received: {len(dns_bytes) - offset}") 
         elif len(dns_bytes) - offset == 11:
             assert dns_bytes[offset] == 0
             
@@ -353,6 +387,22 @@ class ResourceRecord(ctypes.BigEndianStructure):
           
 @dataclass
 class DNS:
+    """ Clase `DNS` (dataclass)
+        Representa un mensaje DNS completo, organizando todas sus secciones
+        en estructuras de alto nivel.
+
+        Los métodos de clase provistos para crear estructuras `DNS` permiten
+        no tener que importar ni usar estas estructuras de manera directa.
+
+        Almacena los campos *header*, *question*, *answer*,
+        *authority* y *additional* de un mensaje DNS.
+
+        **Notas**:
+            - Por simplicidad de diseño y dado que la mayoría de los clientes
+              esta clase solo considera una pregunta (*Question*) y descarta las demás al
+              leer desde bytes.
+            - Si almacena todas las respuestas y registros en forma de lista
+    """
     header:     Header
     question:   Question | None
     answers:     list[ResourceRecord]
@@ -368,6 +418,15 @@ class DNS:
 
     @classmethod
     def from_bytes(cls, dns_bytes: bytes) -> DNS:
+        """ Crea y retorna un objeto `DNS` a partir de los bytes crudos de un mensaje.
+            Parsea secuencialmente las secciones de *Header*, *Question*, *Answer*,
+            *Authority* y *Additional* según los contadores indicados en *Header*.
+
+            Args:
+                dns_bytes (bytes): Mensaje DNS completo en formato de bytes.
+            Returns:
+                Un objeto DNS con todas sus secciones instanciadas.
+        """
         h = Header.from_bytes(dns_bytes)
         # ------Question
         # largo acumulado del mensaje mientras es parseado
@@ -403,6 +462,17 @@ class DNS:
 
     @classmethod
     def from_socket(cls, dns_bytes: bytes, ip: str, port: int = 53, buff_size: int = 4060) -> DNS:
+        """ Envía una consulta DNS en formato de bytes a un servidor mediante
+        un socket UDP y retorna la respuesta parseada.
+
+        Args:
+            dns_bytes (bytes): Mensaje de consulta DNS a enviar.
+            ip (str): Dirección IP del servidor DNS destino.
+            port (int): Puerto del servidor DNS (por defecto 53).
+            buff_size (int): Tamaño del buffer para recibir la respuesta (por defecto 4060).
+        Returns:
+            Un objeto DNS generado a partir de la respuesta recibida.
+        """
         addr = (ip, port)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
@@ -417,6 +487,16 @@ class DNS:
         return DNS.from_bytes(data)
 
     def send(self, ip: str, port: int = 53, buff_size: int = 4096) -> bytes:
+        """ Envía el mensaje DNS actual a un servidor mediante un socket UDP
+            y retorna los bytes crudos de la respuesta.
+
+            Args:
+                ip (str): Dirección IP del servidor DNS destino.
+                port (int): Puerto del servidor DNS (por defecto 53).
+                buff_size (int): Tamaño del buffer para recibir la respuesta (por defecto 4096).
+            Returns:
+                Los bytes de la respuesta recibida desde el servidor.
+        """
         addr = (ip, port)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
