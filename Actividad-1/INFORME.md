@@ -255,3 +255,8 @@ Una vez ya configurado todo, puedes intentar ir a las siguientes páginas:
   * Buffer menor al mensaje, pero mayor que el área de headers: tamaño 100 que es un poco más grande que el header pero mucho más pequeño que el
     html.Esto se comprueba viendo los headers que se imprimen en la pantalla del servidor proxy.
   * Buffer menor al área de headers, pero mayor que la start line: tamaño 20. La start_line es poco menos de 20 y el resto son más que 20.
+
+## Uso de IA
+Para esta actividad he usado la IA para consultas sobre HTTP, ayudarme a estructurar mi diseño, debug y generación de código
+mínima, según recuerdo, el método `from_file`, el diccionario `MIME_TYPES`, parcialmente `from_json` de `proxy_config.py` y
+los `index.*` de la carpeta html, el resto fue escrito por mí.
