@@ -355,22 +355,22 @@ class ResourceRecord(ctypes.BigEndianStructure):
         if len(dns_bytes) - offset < 11: # name + type + ... + rdlength
             raise Exception(f"Expected at least 11 bytes. Received: {len(dns_bytes) - offset}") 
         elif len(dns_bytes) - offset == 11:
-            assert dns_bytes[offset] == 0
+            assert dns_bytes[offset] == 0 # En otro caso, el mensaje dns es incorrecto ya que este byte corresponde a un largo
             
         if (dns_bytes[offset] & 0xC0) == 0xC0: # campo name es un *compression pointer*
             name = dns_bytes[offset:offset + 2]
             name_off = 2
-        else: 
-            name_end = dns_bytes.find(b'\x00', offset) + 1
+        else:  # campo name no está comprimido
+            name_end = dns_bytes.find(b'\x00', offset) + 1 # busca caracter de término
             name = dns_bytes[offset: name_end]
             name_off = 1
             
-        rr = cls.from_buffer_copy(dns_bytes, offset + name_off)
+        rr = cls.from_buffer_copy(dns_bytes, offset + name_off) # Crea estructura para rellenar
         rr.name = name
-        if memoryview(dns_bytes)[offset+10+name_off-1] != rr.rdlength:
+        if memoryview(dns_bytes)[offset+10+name_off-1] != rr.rdlength: # Caso raro
             rr.rddta = dns_bytes[offset + 10+name_off:]
-            
-        else:
+
+        else: # El largo de rddta es el largo declarado
             rr.rddta = dns_bytes[offset + 10+name_off: offset + 10+name_off + rr.rdlength]
        
         return rr
