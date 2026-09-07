@@ -1,3 +1,5 @@
+
+import logging
 from pathlib import Path
 
 BASE_DIR: Path = Path(__file__).parent
@@ -8,7 +10,9 @@ SERVER_PORT = 8080
 SERVER_ADDRESS: tuple[str, int] = (SERVER_IP, SERVER_PORT)
 SERVER_BUFFER_SIZE: int = 5000
 
+logging.basicConfig(level=logging.DEBUG)
 
+LOGGER = logging.getLogger(__name__)
 
 BANNER = (
     """
