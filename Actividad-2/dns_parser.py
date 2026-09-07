@@ -118,6 +118,10 @@ class Header(ctypes.BigEndianStructure):
             ancount=self.ancount,
             arcount=self.arcount
         )
+def ip_to_str(ip: bytes):
+    """ Dado una ip en bytes retorna su ip en string"""
+    return ".".join(map(str, ip))
+
 def name_to_str(name: bytes) -> str:
     """ Dado un name, devuelve su decodificación
         Args:
