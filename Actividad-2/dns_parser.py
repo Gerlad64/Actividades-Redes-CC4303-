@@ -351,15 +351,15 @@ class ResourceRecord(ctypes.BigEndianStructure):
 class DNS:
     header:     Header
     question:   Question | None
-    answer:     ResourceRecord | None
-    authority:  ResourceRecord | None
-    additional: ResourceRecord | None
+    answers:     list[ResourceRecord]
+    authority_records:  list[ResourceRecord]
+    additional_records: list[ResourceRecord]
 
     def to_bytes(self) -> bytes:
         question   = b'' if self.question is None else self.question.to_bytes()
-        answer     = b'' if self.answer is None else self.answer.to_bytes()
-        authority  = b'' if self.authority is None else self.authority.to_bytes()
-        additional = b'' if self.additional is None else self.additional.to_bytes()
+        answer     = b''.join(a.to_bytes() for a in self.answers           )
+        authority  = b''.join(a.to_bytes() for a in self.authority_records )
+        additional = b''.join(a.to_bytes() for a in self.additional_records)
         return self.header.to_bytes() + question + answer + authority + additional
 
     @classmethod
@@ -368,17 +368,34 @@ class DNS:
         # ------Question
         # largo acumulado del mensaje mientras es parseado
         offset = len(h.to_bytes())
-        q = None if h.qdcount == 0 else Question.from_bytes(dns_bytes, offset)
-        offset += 0 if q is None else len(q.to_bytes())
+        questions: list[Question] = []
+        for _ in range(h.qdcount):
+            rr = Question.from_bytes(dns_bytes, offset)
+            offset += len(rr.to_bytes())
+            questions.append(rr)
+        q = questions[0] if questions else None # Solo guarda el primer registro
         # ------Answer
-        a = None if h.ancount == 0 else ResourceRecord.from_bytes(dns_bytes, offset)
-        offset += 0 if a is None else len(a.to_bytes())
+        answers = []
+        for _ in range(h.ancount):
+            rr = ResourceRecord.from_bytes(dns_bytes, offset)
+            offset += len(rr.to_bytes())
+            answers.append(rr)
+        #a = answers[0] if answers else None # Solo guarda el primer registro
         # ------Authority
-        auth = None if h.nscount == 0 else ResourceRecord.from_bytes(dns_bytes, offset)
-        offset += 0 if auth is None else len(auth.to_bytes())
+        auths = []
+        for _ in range(h.nscount):
+            rr = ResourceRecord.from_bytes(dns_bytes, offset)
+            offset += len(rr.to_bytes())
+            auths.append(rr)
+        #auth = auths[0] if auths else None # Solo guarda el primer registro
         #------Additional
-        addt = None if h.arcount == 0 else ResourceRecord.from_bytes(dns_bytes, offset)
-        return cls(h, q, a, auth, addt)
+        addts = []
+        for _ in range(h.arcount):
+            rr = ResourceRecord.from_bytes(dns_bytes, offset)
+            offset += len(rr.to_bytes())
+            addts.append(rr)
+        #addt = addts[0] if addts else None # Solo guarda el primer registro
+        return cls(h, q, answers, auths, addts)
 
     @classmethod
     def from_socket(cls, dns_bytes: bytes, ip: str, port: int = 53, buff_size: int = 4060) -> DNS:
@@ -413,7 +430,7 @@ class DNS:
         return DNS(
             header    = self.header.copy(),
             question  = None if self.question is None else self.question.copy(),
-            answer    = None if self.answer is None else self.answer.copy(),
-            authority = None if self.authority is None else self.authority.copy(),
-            additional= None if self.additional is None else self.additional.copy()
+            answers    =        [a.copy() for a in self.answers],
+            authority_records = [a.copy() for a in self.authority_records],
+            additional_records= [a.copy() for a in self.additional_records]
         )
