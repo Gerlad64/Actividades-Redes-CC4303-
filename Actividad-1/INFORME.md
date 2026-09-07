@@ -175,7 +175,8 @@ def recv_full_msg(conn_socket: socket.socket, buff_size: int, end: str) -> tuple
 def recv_n_bytes(conn_socket: socket.socket, buff_size: int, nbytes: int) -> tuple[bytes, bytes]:
     """ Recibe un mensaje en una conexión tcp de hasta `nbytes`"""
 ```
-Donde la primera existe una cadena o patrón para reconocer cuando términa el mensaje
+Las cuales ejecutan en bucle `recv` hasta términar el mensaje,
+donde en la primera, existe una cadena o patrón para reconocer cuando términa el mensaje
 y la segunda se conoce cuantos bytes se espera recibir.
 
 En el caso particular de HEAD y BODY, la cabecera del mensaje términa con la cadena `"\r\n\r\n"`,
