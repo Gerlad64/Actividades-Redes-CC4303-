@@ -85,8 +85,10 @@ if __name__ == "__main__":
     
     while True:
         LOGGER.info("\033[32mCreating udp socket\033[0m")
+        # Creación rutinaria de socket
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udp_socket.bind(SERVER_ADDRESS)
+        # Escuchar peticiones
         message, address = udp_socket.recvfrom(SERVER_BUFFER_SIZE)
         LOGGER.info("\033[32mReceived a message\033[0m from: %s", f"{address[0]}:{address[1]}")
         dns = DNS.from_bytes(message)
@@ -102,6 +104,6 @@ if __name__ == "__main__":
             LOGGER.info("\x1b[31mCould not resolve\x1b[0m")
             udp_socket.close()
         else:
-            LOGGER.info("\033[32mResolved dns\033[0m:\n %s\n", dns.to_bytes())
+            LOGGER.info("\033[32mResolved dns\033[0m:\n %s\n", dns.to_bytes().hex())
             udp_socket.sendto(dns.to_bytes(), address)
             udp_socket.close()
