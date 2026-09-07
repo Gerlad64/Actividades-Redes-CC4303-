@@ -83,16 +83,27 @@ class Header(ctypes.BigEndianStructure):
         ("arcount", ctypes.c_uint16),
     ]
     def to_bytes(self):
+        """ Retorna los bytes correspondientes al *header* de un mensaje dns"""
         return bytes(self)
 
     @classmethod
     def from_bytes(cls, dns_bytes: bytes, offset: int = 0) -> Header:
+        """ Crea un objeto `Header` a partir de los bytes de un mensaje dns.
+            El tamaño del mensaje debe ser mínimo 12 bytes.
+
+            Args:
+                dns_bytes (bytes): Un mensaje dns, no necesita ser solo el header.
+                offset (int): offset que indica donde comenzar a leer `dns_bytes`
+            Returns:
+                Un objeto Header.
+        """
         if len(dns_bytes) - offset < 12:
             raise Exception("Expected 12 bytes")
             
         return Header.from_buffer_copy(dns_bytes, offset)
         
     def copy(self) -> Header:
+        """ Crea y retorna una copia del objeto"""
         return Header(
             id=self.id,
             qr=self.qr,
@@ -107,7 +118,71 @@ class Header(ctypes.BigEndianStructure):
             ancount=self.ancount,
             arcount=self.arcount
         )
+def name_to_str(name: bytes) -> str:
+    """ Dado un name, devuelve su decodificación
+        Args:
+            name (bytes): Inicio de la secuencia que contiene una name
+        Returns:
+            El string representado por name
+        **Example**:
+        ```python
+        name_to_str(0x07_65_78_61_6d_70_6c_65_03_63_6f_6d_00.to_bytes(13)) == "example.com"
+        ```
+    """
+    labels = []
+    i = 0
 
+    while i < len(name):
+        length = name[i]
+        i += 1
+        if length == 0:
+            break
+        labels.append(name[i:i+length].decode("ascii"))
+        i+=length
+
+    return ".".join(labels)
+#print(name_to_str(0x07_65_78_61_6d_70_6c_65_03_63_6f_6d_00.to_bytes(13)))
+def is_compressed(first_name_byte: int) -> bool:
+    """ Determina si un name está en forma comprimida.
+
+        Args:
+            first_name_byte (int): El primer byte de los bytes de name
+        Returns:
+            True si está comprimido, es decir, los primeros dos bits son b'11'.
+            False si no está comprimido en caso contrario, es decir, la secuencia
+            siguiente codifica un nombre.
+
+    """
+    return (first_name_byte & 0xC0) == 0xC0
+
+def get_offset(name_bytes: bytes) -> int:
+    """ Retorna el offset cuando name está en forma comprimida """
+    return ((name_bytes[0] & 0x3F) << 8) | name_bytes[1]
+
+def decompress_name(name_bytes: bytes, dns_bytes: bytes) -> bytes:
+    """ Descompresión básica de *name*.
+        Verifica si los bytes pasados son un nombre o un puntero.
+        En caso de ser un nombre, retorna los bytes hasta el final b'\x00'.
+        Si es un puntero busca en el mensaje completo el nombre a partir del puntero.
+
+        Args:
+            name_bytes (bytes): bytes con nombre a ser descomprimido
+            dns_bytes (bytes): mensaje en donde se buscará el nombre
+        Returns:
+            *name* en formato descomprimido, es decir, un nombre en lugar de un offset o puntero.
+
+        **Notes**:
+            - Se dice que es una implementación básica, ya que al parecer, dentro de un nombre se puede
+              encontrar otro offset, por ejemplo \x03www\xC0<offset>. Esta función no maneja esos casos.
+            - Caso que **sí** maneja (de ser posible) es cuando hay offset anidados de esta forma:
+                    offset1 --> offset2 --> ... --> name
+              ya que esta implementación utiliza recursión
+    """
+    if is_compressed(name_bytes[0]):
+        offset = get_offset(name_bytes)
+        return decompress_name(dns_bytes[offset:], dns_bytes)
+    name_end = name_bytes.find(b'\x00') + 1
+    return name_bytes[:name_end]
  
 class Question(ctypes.BigEndianStructure):
     """ Clase `Question`, hereda de ctypes.BigEndianStructure
@@ -124,7 +199,7 @@ class Question(ctypes.BigEndianStructure):
         ("qclass", ctypes.c_uint16)
     ]
 
-    def __init__(self, qname: bytes = b'\x0000', *args, **kwargs):
+    def __init__(self, qname: bytes = b'\x0000', *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.qname = qname
 
