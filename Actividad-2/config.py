@@ -10,7 +10,8 @@ SERVER_PORT = 8080
 SERVER_ADDRESS: tuple[str, int] = (SERVER_IP, SERVER_PORT)
 SERVER_BUFFER_SIZE: int = 5000
 
-logging.basicConfig(level=logging.DEBUG)
+DEBUG_MODE = True # Encender y apagar modo debug
+logging.basicConfig(level=(logging.DEBUG if DEBUG_MODE else logging.INFO))
 
 LOGGER = logging.getLogger(__name__)
 
