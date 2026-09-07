@@ -1,6 +1,8 @@
 # Informe Actividad 1
 **Gerald Ponce Díaz**
 
+**github**: https://github.com/Gerlad64/Actividades-Redes-CC4303-
+
 ## Documentación y Diseño
 Para poder lograr lo propuesto por la actividad se destinó el archivo `http_parser.py` para contener toda la lógica
 de parsear mensajes http, en particular, en este archivo se optó por destinar el trabajo
