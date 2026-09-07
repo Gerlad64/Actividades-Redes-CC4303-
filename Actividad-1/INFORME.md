@@ -190,6 +190,7 @@ el comentario de la nota el valor de retorno de estas dos funciones es una tupla
 es lo solicitado y el segundo es el resto que se pudo haber recibido.
 
 ## Diagrama de Flujo
+![diagrama](./diagrama.JPG)
 
 ### Dependencias y Entorno
 Se probó con `python` 3.13 y 3.14 sin librerías externas, y en los sitemas operativos MacOS y Linux. 
