@@ -41,7 +41,7 @@ class ProxyConfig:
         elif route.startswith("https://"):
             route = route[len("https://") :]
 
-        return route in self.blocked
+        return route.removesuffix("/") in self.blocked
 
     def apply(self, http: HTTP) -> HTTP:
         """ Retorna un nuevo objeto HTTP con las palabras prohibidas reemplazadas
