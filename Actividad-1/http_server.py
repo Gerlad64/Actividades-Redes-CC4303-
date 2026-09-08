@@ -82,7 +82,9 @@ if __name__ == '__main__':
             new_socket.send(http_res.create_message().encode())
 
         else: # Si no se realiza una petición a un sitio externo, se retorna
-            route = http_req.start_line.split()[1][len(f"http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}/"):]
+            target = http_req.start_line.split()[1]
+            prefix = f"http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}/"
+            route = target[len(prefix):] if target.startswith(prefix) else target.lstrip("/")
             print("route: ",route)
             if len(route) <= 1:
                 response_bytes = HTTP.from_html(
