@@ -208,6 +208,7 @@ Las configuraciones del servidor se encuentran en `config.py`.
 Las más relevantes son las siguiente:
 - **SERVER_ADDRESS**: Configura en que IP y puerto se va a servir `http_server.py`
 - **HTML_PATH**: Ruta al html de la landing page.
+- **SERVER_BUFFER_SIZE**: para configurar el tamaño del buffer
 También se puede configurar `proxy.json` para cambiar las páginas a ser bloqueadas o filtradas.
 
 ##### Cliente
