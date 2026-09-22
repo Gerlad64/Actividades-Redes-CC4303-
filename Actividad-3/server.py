@@ -10,7 +10,7 @@ if __name__ == '__main__':
     while True:
         try:
             message, address = sock.recvfrom(4000)
-            print(message)
+            print(message.decode(), end='')
             if message.find(b'EOF') != -1:
                 sock.sendto(b'OK', address)
         except KeyboardInterrupt:
