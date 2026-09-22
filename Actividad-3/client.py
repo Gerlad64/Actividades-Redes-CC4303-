@@ -11,3 +11,10 @@ if __name__ == '__main__':
         m = msg[i:i+16]
         sock.sendto(m.encode(), SERVER_ADDRESS)
     sock.sendto(b"EOF", SERVER_ADDRESS)
+    while True:
+        message, _ = sock.recvfrom(40)
+        if message:
+            print(message)
+            break
+    sock.close()
+        

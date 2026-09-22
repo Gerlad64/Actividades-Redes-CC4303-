@@ -11,6 +11,8 @@ if __name__ == '__main__':
         try:
             message, address = sock.recvfrom(4000)
             print(message)
+            if message.find(b'EOF') != -1:
+                sock.sendto(b'OK', address)
         except KeyboardInterrupt:
             sock.close()
             break
