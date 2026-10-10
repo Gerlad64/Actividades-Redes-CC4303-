@@ -21,6 +21,13 @@ class SocketTCP:
     def port(self) -> int:
         return self.bind_addr[1]
 
+    @property
+    def AF_INET(self):
+        return socket.AF_INET
+
+    def SOCK_STREAM(self):
+        return socket.SOCK_STREAM
+        
     # Métodos para mantener la misma API de socket.socket
 
     def connect(self, addr: tuple[str, int]) -> None:
@@ -83,6 +90,12 @@ class SocketTCP:
     def socket(cls, foo, bar) -> SocketTCP:
         return cls()
 
+    def listen(self, workers: int) -> None:
+        pass
+
+    def close(self) -> None:
+        print("Closing Connection")
+        
     @staticmethod
     def create_segment(seq: int, flags: int) -> Segment:
         return Segment(seq, flags)
