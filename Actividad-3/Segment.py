@@ -1,7 +1,17 @@
 from __future__ import annotations
 
 import ctypes
+from enum import IntEnum
 
+
+class SegmentFlags(IntEnum):
+    ACK = 4
+    SYN = 2
+    FIN = 1
+
+ACK = SegmentFlags.ACK
+SYN = SegmentFlags.SYN
+FIN = SegmentFlags.FIN
 
 class Segment(ctypes.BigEndianStructure):
     """ Segment
@@ -20,25 +30,38 @@ class Segment(ctypes.BigEndianStructure):
     
     _fields_ = [
         ("SEQ", ctypes.c_uint32),
+        ("padd", ctypes.c_uint8, 5),
         ("ACK", ctypes.c_uint8, 1),
         ("SYN", ctypes.c_uint8, 1),
         ("FIN", ctypes.c_uint8, 1),
-        #("padd", ctypes.c_uint8, 5)
     ]
     _pack_ = 1
 
     def __init__(self, seq: int, flags: int) -> None:
         if flags < 0 or flags > 7:
-            raise Exception("Flag Inválida")
+            raise ValueError(
+                f"Unexpected flag: A valid flag range from 0 to 7 inclusive,"
+                f"but got {flags}"
+            )
             
         super().__init__(
             SEQ= seq,
-            ACK=flags,
-            SYN=flags,
-            FIN=flags
-           # padd=0
+            padd=0,
+            ACK=flags & ACK != 0,
+            SYN=flags & SYN != 0,
+            FIN=flags & FIN != 0
         )
 
+    @property
+    def flags(self) -> int:
+        return (self.ACK << 2) + (self.SYN << 1) + self.FIN
+
+    @flags.setter
+    def flags(self, value: int) -> None:
+        self.ACK = value & ACK != 0
+        self.SYN = value & SYN != 0
+        self.FIN = value & FIN != 0
+    
     def to_bytes(self):
         return bytes(self)
 
@@ -49,8 +72,24 @@ class Segment(ctypes.BigEndianStructure):
            los primeros 4 almacenan el número de secuencia y el resto 
            las flags ACK, SYN, FIN en ese orden.
         """
-        if len(seg[offset:]):
-            raise Exception("Byte sequence too short")
-        seq   = int.from_bytes(seg[offset: offset+5])
-        flags = int.from_bytes(seg[offset+5:])
+        if len(seg) - offset < 5:
+            raise ValueError(
+                f"Byte sequence too short: expected at least 5 bytes after offset {offset},"
+                f"but got {len(seg) - offset}"
+            )
+        seq   = int.from_bytes(seg[offset:offset+4])
+        flags = int.from_bytes(seg[offset + 4:offset + 5])
         return cls(seq, flags)
+
+    def flag_to_str(self):
+        """Devuelve un string que indica cuales flags del segmento guradado están activas"""
+        active_flags = [f for f in ["ACK", "SYN", "FIN"] if getattr(self, f) > 0]
+        
+        return "NO-FLAGS" if self.flags == 0 else "+".join(active_flags)
+
+    @staticmethod
+    def intflag_to_str(flags: int):
+        """Toma una flag en formato int y devuelve un string que indica cuales flags se encuentran activas"""
+        active_flags = [f.name for f in SegmentFlags if (flags & f.value) > 0] 
+
+        return "NO-FLAGS" if flags & 7 == 0 else "+".join(active_flags)

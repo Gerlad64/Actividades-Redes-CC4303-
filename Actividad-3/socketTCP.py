@@ -3,15 +3,35 @@ from __future__ import annotations
 import socket
 from dataclasses import dataclass, field
 from random import randint
+from socket import SocketType
 
-from Segment import Segment
+from exceptions.handshake_errs import *
+from Segment import *
 
 
 @dataclass
 class SocketTCP:
-    bind_addr: tuple[str, int] = ('notvalid', 8080)
-    conn_addr: tuple[str, int] = ('notvalid', 8070)
-    _socket = field(default_factory=lambda: socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
+    _bind_addr: tuple[str, int] = field(
+        default=('notvalid', 8080),
+        init=False
+    )
+    _conn_addr: tuple[str, int] = field(
+        default=('notvalid', 8070),
+        init=False
+    )
+    _socket: SocketType = field(
+        default_factory=lambda: socket.socket(socket.AF_INET, socket.SOCK_DGRAM),
+        repr=False,
+        compare=False
+    )
+
+    @property
+    def bind_addr(self) -> tuple[str, int]:
+        return self._bind_addr
+
+    @bind_addr.setter
+    def bind_addr(self, addr: tuple[str, int]) -> None:
+        self.bind(addr)
 
     @property
     def ip(self) -> str:
@@ -46,13 +66,26 @@ class SocketTCP:
         while True:
             msg, addr_server = self._socket.recvfrom(16)
             recv_seg = SocketTCP.parse_segment(msg)
-            if recv_seg.SYN == seq_id + 1 and recv_seg.ACK == 1:
-                break
+            if recv_seg.flags != SYN+ACK:
+                raise SegmentFlagsErr(
+                    expected=SYN+ACK, 
+                    actual=recv_seg, 
+                    step=f"while expecting server with addr {addr_server[0]}:{addr_server[1]} to respond SYN+ACK"
+                )
+            if recv_seg.SEQ != seq_id + 1:
+                raise SequenceErr(
+                    expected= seq_id + 1,
+                    actual= recv_seg.SEQ,
+                    step=f"after receiving SYN+ACK from server with addr {addr_server[0]}:{addr_server[1]}"
+                )
+            break
         
         # Se guarda addr
         self.conn_addr = addr_server
         # Completar el Handshake
-        init_seg.SEQ += 2
+        init_seg.SEQ = seq_id + 2
+        # reset de flags
+        init_seg.flags = 0
         init_seg.SYN = 0
         init_seg.ACK = 1
         self._socket.sendto(init_seg.to_bytes(), addr_server)
@@ -60,7 +93,7 @@ class SocketTCP:
     
     def bind(self, addr: tuple[str, int]) -> None:
         self._socket.bind(addr)
-        self.bind_addr = self._socket.getsockname()
+        self._bind_addr = self._socket.getsockname()
 
     def accept(self) -> tuple[SocketTCP, tuple[str, int]]:
         if self.bind_addr[0] == 'notvalid':
@@ -69,9 +102,9 @@ class SocketTCP:
         msg, addr_client = self._socket.recvfrom(16)
         recv_seg = SocketTCP.parse_segment(msg)
         # Sincronización recivida
-        if recv_seg.SYN == 1:
+        if recv_seg.flags == SYN:
             # Manda SYN + ACK 
-            recv_seg.ACK = 1
+            recv_seg.flags = SYN + ACK
             recv_seg.SEQ += 1
             # Crea nuevo socket (canal de comunicación)
             new_sock = SocketTCP()
@@ -80,11 +113,22 @@ class SocketTCP:
             # Manda mensaje y retorna el socket usado como canal de
             # comunicación
             new_sock._socket.sendto(recv_seg.to_bytes(), addr_client)
-            msg,_ = new_sock._socket.recvfrom(16)
-            if new_sock.parse_segment(msg).ACK == 1:
+            msg, _ = new_sock._socket.recvfrom(16)
+            ack_seg = new_sock.parse_segment(msg)
+            if ack_seg.flags == ACK:
                 return (new_sock, new_sock.bind_addr)
                 
-        raise Exception("Accept error")
+            raise SegmentFlagsErr(
+                expected=ACK,
+                actual=ack_seg,
+                step="while completing the handshake's last step (ACK from client)"
+            )
+                
+        raise SegmentFlagsErr(
+            expected=SYN,
+            actual=recv_seg.flags,
+            step="while expecting SYN request from client"
+        )
 
     @classmethod
     def socket(cls, foo, bar) -> SocketTCP:
