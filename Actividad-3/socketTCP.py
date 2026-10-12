@@ -55,10 +55,10 @@ class SocketTCP:
         seq_id = randint(0, 100)
         init_seg = Segment(seq_id, 0)
         init_seg.SYN = 1
-        # Reservar dirección
+        # Reservar dirección y actualizar bind_addr
         self._socket.bind(('127.0.0.1', 0))
         # Actualizar dirección de bind
-        self.bind_addr = self._socket.getsockname()
+        #self.bind_addr = self._socket.getsockname() # --> error: self.bind_addr ahora es property que llama a bind
         # Mandarlo por la dirección bindeada
         self._socket.sendto(init_seg.to_bytes(), addr) # TODO timeout, mandar hasta recibir
         # Servidor crea nuevo socket, manda su addr y SYN+ACK
