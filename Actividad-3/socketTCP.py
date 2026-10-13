@@ -11,6 +11,12 @@ from Segment import *
 
 @dataclass
 class SocketTCP:
+    """ Dataclass SocketTCP
+    Implementa una versión simplificada del protocolo TCP usando sockets UDP por debajo.
+    Presenta la misma API que la de sockets TCP de Python, aunque no con la funcionalidad completa
+    en algunos casos. Esto con el propósito de hacer compatibles aquellos scripts que usan sockets
+    de Python.
+    """
     _bind_addr: tuple[str, int] = field(
         default=('notvalid', 8080),
         init=False
@@ -27,30 +33,38 @@ class SocketTCP:
 
     @property
     def bind_addr(self) -> tuple[str, int]:
+        """Devuelve una vista de la dirección donde almacenada donde se escucharán peticiones"""
         return self._bind_addr
 
     @bind_addr.setter
     def bind_addr(self, addr: tuple[str, int]) -> None:
+        """Establece una dirección a la que escuchar peticiones. Llama al método bind por detrás"""
         self.bind(addr)
 
     @property
     def ip(self) -> str:
+        """Retorna la IP de bind"""
         return self.bind_addr[0]
         
     @property
     def port(self) -> int:
+        """Devuelve el puerto de bind"""
         return self.bind_addr[1]
 
     @property
     def AF_INET(self):
+        """Devuelve el mismo valor que socket.socket.AF_INET"""
         return socket.AF_INET
 
+    @property
     def SOCK_STREAM(self):
+        """Devuelve el mismo valor que socket.socket.AF_INET"""
         return socket.SOCK_STREAM
         
     # Métodos para mantener la misma API de socket.socket
 
     def connect(self, addr: tuple[str, int]) -> None:
+        """Establece una conexión con el servidor en la dirección `addr`."""
         # Crear segmento
         seq_id = randint(0, 100)
         init_seg = Segment(seq_id, 0)
@@ -79,7 +93,7 @@ class SocketTCP:
                     step=f"after receiving SYN+ACK from server with addr {addr_server[0]}:{addr_server[1]}"
                 )
             break
-        
+        # Comunicación establecida
         # Se guarda addr
         self.conn_addr = addr_server
         # Completar el Handshake
@@ -92,10 +106,12 @@ class SocketTCP:
         
     
     def bind(self, addr: tuple[str, int]) -> None:
+        """Establece la dirección de escucha peticiones en la dirección addr y actualiza la dirección de bind almacenada"""
         self._socket.bind(addr)
         self._bind_addr = self._socket.getsockname()
 
     def accept(self) -> tuple[SocketTCP, tuple[str, int]]:
+        """Escucha peticiones"""
         if self.bind_addr[0] == 'notvalid':
             raise Exception("Not bind address")
         # Espera recivir mensaje SYNchronize
@@ -132,18 +148,22 @@ class SocketTCP:
 
     @classmethod
     def socket(cls, foo, bar) -> SocketTCP:
+        """Crea un socketTCP, los parámetros se mantienen para igualar a la API de sockets de python"""
         return cls()
 
     def listen(self, workers: int) -> None:
         pass
 
     def close(self) -> None:
+        """Cierra la conexión"""
         print("Closing Connection")
         
     @staticmethod
     def create_segment(seq: int, flags: int) -> Segment:
+        """Crea un segmento"""
         return Segment(seq, flags)
 
     @staticmethod
     def parse_segment(seg: bytes, offset: int=0) -> Segment:
+        """Parsea bytes recibidos a un segmento"""
         return Segment.from_bytes(seg, offset)
