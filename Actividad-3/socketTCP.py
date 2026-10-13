@@ -172,6 +172,52 @@ class SocketTCP:
     def close(self) -> None:
         """Cierra la conexión"""
         print("Closing Connection")
+        # TODO: mandar secuencia FIN
+        self._socket.close()
+
+    def send(self, message: bytes) -> None:
+        """Manda un mensaje por el canal de comunicación establecido usando STOP & WAIT"""
+        if not self._seq_id:
+            raise Exception("No connection established")
+        
+        # Usa Stop & Wait para mandar el primer segmento indicando el
+        # largo del mensaje, y luego, lo usa para mandar iterativamente
+        # el mensaje en paquetes pequeños
+        def _stop_and_wait(packet: bytes, expected_seq):
+            while True:
+                # Bucle hasta recibir segmentos adecuados
+                self._socket.sendto(packet, self.conn_addr)
+                try:
+                    recv_msg, _ = self._socket.recvfrom(16)
+                except TimeoutError: 
+                    # Vuelve a mandar mensaje en caso de timeout
+                    continue
+                recv_seg = Segment.from_bytes(recv_msg)
+                if recv_seg.SEQ == expected_seq and recv_seg.flags == ACK:
+                    break # ACK recibido y secuencia correcta 
+           
+        seg = Segment(seq=self._seq_id)
+
+        # Primer Segmento
+        seg.DTA_LEN = len(message)
+        expected_seq = seg.SEQ + seg.DTA_LEN
+        _stop_and_wait(seg.to_bytes(), expected_seq)
+         
+        # Segmento recibido
+        # Separa el mensaje en trozos de 16 bytes
+        # y los manda mediante Stop & Wait
+        for i in range(0, len(message), 16):
+            m = message[i:i+16]
+            seg.DTA_LEN = len(m)
+            # armar paquete con segmento y mensaje
+            msg = seg.to_bytes() + m
+            expected_seq = seg.SEQ + seg.DTA_LEN
+            _stop_and_wait(msg, expected_seq) 
+            # actualizar secuencia para próximo paquete
+            seg.SEQ = expected_seq
+            
+    def recv(self, buff_size: int) -> bytes:
+        return b''
         
     @staticmethod
     def create_segment(seq: int, flags: int) -> Segment:
