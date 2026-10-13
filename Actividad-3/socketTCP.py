@@ -139,7 +139,7 @@ class SocketTCP:
             # Crea nuevo socket (canal de comunicación)
             new_sock = SocketTCP()
             new_sock.bind((self.bind_addr[0], 0))
-            new_sock.conn_addr = addr_client
+            new_sock._conn_addr = addr_client
             new_sock._seq_id = recv_seg.SEQ
             # Manda mensaje y retorna el socket usado como canal de
             # comunicación
@@ -147,6 +147,7 @@ class SocketTCP:
             msg, _ = new_sock._socket.recvfrom(16)
             ack_seg = new_sock.parse_segment(msg)
             if ack_seg.flags == ACK:
+                new_sock._seq_id = ack_seg.SEQ
                 return (new_sock, new_sock.bind_addr)
                 
             raise SegmentFlagsErr(
