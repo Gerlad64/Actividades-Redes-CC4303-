@@ -221,7 +221,47 @@ class SocketTCP:
         self._seq_id = seg.SEQ
         
     def recv(self, buff_size: int) -> bytes:
-        return b''
+        def _recv_seg() -> tuple[Segment, bytes]:
+            while True:
+                # Recibir y parsear segmento y datos
+                recv_msg, _ = self._socket.recvfrom(5 + 16) # 5 == largo del segmento
+                recv_seg = Segment.from_bytes(recv_msg)
+                dta = recv_msg[5:]
+                # Secuencia requerida para mandar ACK
+                ack_seq = recv_seg.SEQ + recv_seg.DTA_LEN 
+                # Mensaje nuevo: la secuencia recibida coincide con la guardada
+                is_new = recv_seg.SEQ == self._seq_id
+                # Mensaje duplicado: La secuencia de ACK coincide con la guardada
+                is_dup = ack_seq == self._seq_id
+                print(f"SEQ={recv_seg.SEQ} DTA_LEN={recv_seg.DTA_LEN} esperado={self._seq_id} dta={dta!r}")
+                if not (is_new or is_dup): # Mensaje de externo
+                    continue
+                # Manda ACK (ya sea nuevo o duplicado)
+                ack = Segment(seq=ack_seq, flags=ACK)
+                self._socket.sendto(ack.to_bytes(), self._conn_addr)
+                # Si el mensaje recibido es nuevo retorna el segmento y los datos
+                # en la próxima llamada a _recv_seg se vuelve a mandar si no llegó la primera vez
+                if is_new:
+                    return recv_seg, dta
+                
+            
+        # Primer segmento recibido contiene los datos a recibir
+        if self._remaining == 0 and len(self._buffer) == 0:
+            recv_seg, _ = _recv_seg()
+            self._remaining = recv_seg.DTA_LEN
+        target = min(self._remaining + len(self._buffer), buff_size)
+        while len(self._buffer) < target:
+            # recibe los datos
+            recv_seg, dta = _recv_seg()
+            assert(self._seq_id)
+            assert(recv_seg.DTA_LEN == len(dta))
+            # Actualiza el número de secuencia con 
+            self._seq_id += len(dta)
+            self._remaining -= len(dta)
+            self._buffer += dta
+        msg, self._buffer = self._buffer[:target], self._buffer[target:] 
+        
+        return msg
         
     @staticmethod
     def create_segment(seq: int, flags: int) -> Segment:
