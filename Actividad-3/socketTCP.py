@@ -116,6 +116,7 @@ class SocketTCP:
         init_seg.flags = 0
         init_seg.SYN = 0
         init_seg.ACK = 1
+        self._seq_id = init_seg.SEQ
         self._socket.sendto(init_seg.to_bytes(), addr_server)
         
     
