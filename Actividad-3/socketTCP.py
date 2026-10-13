@@ -30,6 +30,8 @@ class SocketTCP:
         repr=False,
         compare=False
     )
+    _timeout: float | None = None
+    _seq_id: int | None = None
 
     @property
     def bind_addr(self) -> tuple[str, int]:
@@ -50,6 +52,16 @@ class SocketTCP:
     def port(self) -> int:
         """Devuelve el puerto de bind"""
         return self.bind_addr[1]
+
+    def settimeout(self, t: float | None):
+        """Establece un timeout para la comunicación STOP & WAIT. Si se establece None,
+           la espera será bloqueante
+        """
+        self._timeout = t
+        self._socket.settimeout(t)
+
+    def gettimeout(self) -> float | None:
+        return self._timeout
 
     @property
     def AF_INET(self):
@@ -96,6 +108,8 @@ class SocketTCP:
         # Comunicación establecida
         # Se guarda addr
         self.conn_addr = addr_server
+        # Se guarda el número de secuencia
+        self._seq_id = seq_id
         # Completar el Handshake
         init_seg.SEQ = seq_id + 2
         # reset de flags
@@ -126,6 +140,7 @@ class SocketTCP:
             new_sock = SocketTCP()
             new_sock.bind((self.bind_addr[0], 0))
             new_sock.conn_addr = addr_client
+            new_sock._seq_id = recv_seg.SEQ
             # Manda mensaje y retorna el socket usado como canal de
             # comunicación
             new_sock._socket.sendto(recv_seg.to_bytes(), addr_client)
