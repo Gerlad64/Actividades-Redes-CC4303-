@@ -27,26 +27,32 @@ class Segment(ctypes.BigEndianStructure):
     """bit que almacena la flag SYN"""
     FIN: int
     """bit que almacena la flag FIN"""
+    DTA_LEN: int
     
     _fields_ = [
         ("SEQ", ctypes.c_uint32),
-        ("padd", ctypes.c_uint8, 5),
+        ("data_len", ctypes.c_uint8, 5),
         ("ACK", ctypes.c_uint8, 1),
         ("SYN", ctypes.c_uint8, 1),
         ("FIN", ctypes.c_uint8, 1),
     ]
     _pack_ = 1
 
-    def __init__(self, seq: int, flags: int) -> None:
+    def __init__(self, seq: int, flags: int = 0, len: int = 0) -> None:
         if flags < 0 or flags > 7:
             raise ValueError(
                 f"Unexpected flag: A valid flag range from 0 to 7 inclusive,"
                 f"but got {flags}"
             )
+        if len > 31 or len < 0:
+            raise ValueError(
+                f"Unexpected data length: A Segment can only store positive numbers up to 31,"
+                f"but got {len}"
+            )
             
         super().__init__(
             SEQ= seq,
-            padd=0,
+            DTA_LEN=len,
             ACK=flags & ACK != 0,
             SYN=flags & SYN != 0,
             FIN=flags & FIN != 0
