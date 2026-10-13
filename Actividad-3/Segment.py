@@ -31,7 +31,7 @@ class Segment(ctypes.BigEndianStructure):
     
     _fields_ = [
         ("SEQ", ctypes.c_uint32),
-        ("data_len", ctypes.c_uint8, 5),
+        ("DTA_LEN", ctypes.c_uint8, 5),
         ("ACK", ctypes.c_uint8, 1),
         ("SYN", ctypes.c_uint8, 1),
         ("FIN", ctypes.c_uint8, 1),
@@ -83,9 +83,10 @@ class Segment(ctypes.BigEndianStructure):
                 f"Byte sequence too short: expected at least 5 bytes after offset {offset},"
                 f"but got {len(seg) - offset}"
             )
-        seq   = int.from_bytes(seg[offset:offset+4])
-        flags = int.from_bytes(seg[offset + 4:offset + 5])
-        return cls(seq, flags)
+        seq     = int.from_bytes(seg[offset:offset+4])
+        flags   = int.from_bytes(seg[offset + 4:offset + 5]) & 7
+        dta_len = int.from_bytes(seg[offset + 4:offset + 5]) >> 3
+        return cls(seq, flags, dta_len)
 
     def flag_to_str(self):
         """Devuelve un string que indica cuales flags del segmento guradado están activas"""
