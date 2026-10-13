@@ -32,6 +32,8 @@ class SocketTCP:
     )
     _timeout: float | None = None
     _seq_id: int | None = None
+    _remaining: int = 0
+    _buffer: bytes = b''
 
     @property
     def bind_addr(self) -> tuple[str, int]:
