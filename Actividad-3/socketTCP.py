@@ -216,6 +216,8 @@ class SocketTCP:
             # actualizar secuencia para próximo paquete
             seg.SEQ = expected_seq
             
+        self._seq_id = seg.SEQ
+        
     def recv(self, buff_size: int) -> bytes:
         return b''
         
