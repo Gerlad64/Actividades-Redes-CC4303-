@@ -3,6 +3,7 @@ from config import *
 from socketTCP import SocketTCP as socket
 
 if __name__ == '__main__':
+    """ TESTS de socketTCP por el lado del servidor"""
     
     #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #sock.bind(SERVER_ADDRESS)
