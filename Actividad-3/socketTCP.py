@@ -176,8 +176,50 @@ class SocketTCP:
     def close(self) -> None:
         """Cierra la conexión"""
         print("Closing Connection")
-        # TODO: mandar secuencia FIN
+        assert(self._seq_id)
+        fin_seg = Segment(self._seq_id, FIN)
+        while True:
+            print(self._conn_addr)
+            self._socket.sendto(fin_seg.to_bytes(), self._conn_addr)
+            recv_msg, _ = self._socket.recvfrom(16)
+            recv_seg = Segment.from_bytes(recv_msg)
+            if recv_seg.flags != FIN+ACK:
+                raise SegmentFlagsErr(
+                    expected=FIN+ACK, 
+                    actual=recv_seg, 
+                    step=f"while expecting server with addr {self._conn_addr[0]}:{self._conn_addr[1]} to respond FIN+ACK"
+                )
+            if recv_seg.SEQ != self._seq_id + 1:
+                raise SequenceErr(
+                    expected= self._seq_id + 1,
+                    actual= recv_seg.SEQ,
+                    step=f"after receiving SYN+ACK from server with addr {self._conn_addr[0]}:{self._conn_addr[1]}"
+                )
+            break
+        fin_seg.SEQ = self._seq_id + 2
+        # reset de flags
+        fin_seg.flags = 0
+        fin_seg.SYN = 0
+        fin_seg.ACK = 1
+        self._seq_id = fin_seg.SEQ
+        self._socket.sendto(fin_seg.to_bytes(), self._conn_addr)
+        self._conn_addr = ('notvalid', 8080)
+        print("Cerrando la conexión")
         self._socket.close()
+
+    def recv_close(self) -> None:
+        # Espera recivir mensaje SYNchronize
+        msg, _ = self._socket.recvfrom(16)
+        recv_seg = SocketTCP.parse_segment(msg)
+        if recv_seg.flags == FIN and recv_seg.SEQ == self._seq_id:
+            recv_seg.flags = FIN+ACK
+            recv_seg.SEQ += 1
+            self._socket.sendto(recv_seg.to_bytes(), self._conn_addr)
+            msg, _ = self._socket.recvfrom(16)
+            ack_seg = Segment.from_bytes(msg)
+            if ack_seg.SEQ == recv_seg.SEQ + 1 and ack_seg.flags == ACK:
+                print("cerrando la conexión")
+                self._socket.close()
 
     def send(self, message: bytes) -> None:
         """Manda un mensaje por el canal de comunicación establecido usando STOP & WAIT"""
