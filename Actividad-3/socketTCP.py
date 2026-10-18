@@ -109,7 +109,7 @@ class SocketTCP:
             break
         # Comunicación establecida
         # Se guarda addr
-        self.conn_addr = addr_server
+        self._conn_addr = addr_server
         # Se guarda el número de secuencia
         self._seq_id = seq_id
         # Completar el Handshake
@@ -190,7 +190,7 @@ class SocketTCP:
         def _stop_and_wait(packet: bytes, expected_seq):
             while True:
                 # Bucle hasta recibir segmentos adecuados
-                self._socket.sendto(packet, self.conn_addr)
+                self._socket.sendto(packet, self._conn_addr)
                 try:
                     recv_msg, _ = self._socket.recvfrom(16)
                 except TimeoutError: 
