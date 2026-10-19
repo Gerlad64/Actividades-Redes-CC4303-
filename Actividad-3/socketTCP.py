@@ -36,6 +36,9 @@ class SocketTCP:
     _remaining: int = 0
     _buffer: bytes = b''
 
+    def __post_init__(self) -> None:
+        self._socket.settimeout(self._timeout)
+
     @property
     def bind_addr(self) -> tuple[str, int]:
         """Devuelve una vista de la dirección donde almacenada donde se escucharán peticiones"""

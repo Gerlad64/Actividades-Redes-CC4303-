@@ -33,6 +33,7 @@ if __name__ == '__main__':
     os.remove("client-addr.txt") 
     assert result
     print("Server: test: recibiendo mensajes pequeños")
+    connection_socketTCP.settimeout(2.0)
     # test 1
     buff_size = 16
     full_message = connection_socketTCP.recv(buff_size)
@@ -103,6 +104,8 @@ if __name__ == '__main__':
         # finalmente retornamos el mensaje
         return full_msg[:nbytes], full_msg[nbytes:]
         
+    
+    connection_socketTCP.settimeout(2.0)
     quijote_bytes, _ = recv_n_bytes(connection_socketTCP, 1024, 124111)
     assert len(quijote_bytes) == 124111
     with open("quijote.txt", "r", encoding="utf-8") as file:
