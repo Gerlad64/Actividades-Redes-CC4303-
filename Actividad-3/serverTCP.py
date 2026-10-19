@@ -1,8 +1,9 @@
 #import socket
+import os
 from time import sleep
+
 from config import *
 from socketTCP import SocketTCP as socket
-import os
 
 if __name__ == '__main__':
     """ TESTS de socketTCP por el lado del servidor"""
