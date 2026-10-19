@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import socket
+import time
 from dataclasses import dataclass, field
 from random import randint
 from socket import SocketType
@@ -30,10 +31,14 @@ class SocketTCP:
         repr=False,
         compare=False
     )
-    _timeout: float | None = None
+    _timeout: float | None = 1.0
     _seq_id: int | None = None
     _remaining: int = 0
     _buffer: bytes = b''
+
+    def __post_init__(self):
+        if self._timeout is not None:
+            self._socket.settimeout(self._timeout)
 
     @property
     def bind_addr(self) -> tuple[str, int]:
@@ -79,48 +84,40 @@ class SocketTCP:
 
     def connect(self, addr: tuple[str, int]) -> None:
         """Establece una conexión con el servidor en la dirección `addr`."""
-        # Crear segmento
         seq_id = randint(0, 100)
         init_seg = Segment(seq_id, 0)
         init_seg.SYN = 1
-        # Reservar dirección y actualizar bind_addr
+        
         self._socket.bind(('127.0.0.1', 0))
-        # Actualizar dirección de bind
-        #self.bind_addr = self._socket.getsockname() # --> error: self.bind_addr ahora es property que llama a bind
-        # Mandarlo por la dirección bindeada
-        self._socket.sendto(init_seg.to_bytes(), addr) # TODO timeout, mandar hasta recibir
-        # Servidor crea nuevo socket, manda su addr y SYN+ACK
-        # recibido por el socket
+        self._bind_addr = self._socket.getsockname()
+        
+        # Enviar SYN y esperar SYN+ACK con retransmisión por timeout
+        addr_server = None
         while True:
-            msg, addr_server = self._socket.recvfrom(16)
+            self._socket.sendto(init_seg.to_bytes(), addr)
+            try:
+                msg, addr_server = self._socket.recvfrom(16)
+            except (TimeoutError, socket.timeout):
+                print("DEBUG: Client connect timeout. Retrying SYN...")
+                continue
+            
             recv_seg = SocketTCP.parse_segment(msg)
-            if recv_seg.flags != SYN+ACK:
-                raise SegmentFlagsErr(
-                    expected=SYN+ACK, 
-                    actual=recv_seg, 
-                    step=f"while expecting server with addr {addr_server[0]}:{addr_server[1]} to respond SYN+ACK"
-                )
+            
+            if recv_seg.flags != SYN + ACK:
+                continue
             if recv_seg.SEQ != seq_id + 1:
-                raise SequenceErr(
-                    expected= seq_id + 1,
-                    actual= recv_seg.SEQ,
-                    step=f"after receiving SYN+ACK from server with addr {addr_server[0]}:{addr_server[1]}"
-                )
+                continue
             break
-        # Comunicación establecida
-        # Se guarda addr
+        
         self._conn_addr = addr_server
-        # Se guarda el número de secuencia
         self._seq_id = seq_id
-        # Completar el Handshake
+        
+        # Completar el 3-way handshake enviando ACK final
         init_seg.SEQ = seq_id + 2
-        # reset de flags
-        init_seg.flags = 0
-        init_seg.SYN = 0
-        init_seg.ACK = 1
+        init_seg.flags = ACK
         self._seq_id = init_seg.SEQ
         self._socket.sendto(init_seg.to_bytes(), addr_server)
-        
+        print("DEBUG: Client handshake complete.")
     
     def bind(self, addr: tuple[str, int]) -> None:
         """Establece la dirección de escucha peticiones en la dirección addr y actualiza la dirección de bind almacenada"""
@@ -131,39 +128,44 @@ class SocketTCP:
         """Escucha peticiones"""
         if self.bind_addr[0] == 'notvalid':
             raise Exception("Not bind address")
-        # Espera recivir mensaje SYNchronize
-        msg, addr_client = self._socket.recvfrom(16)
-        recv_seg = SocketTCP.parse_segment(msg)
-        # Sincronización recivida
-        if recv_seg.flags == SYN:
-            # Manda SYN + ACK 
-            recv_seg.flags = SYN + ACK
-            recv_seg.SEQ += 1
-            # Crea nuevo socket (canal de comunicación)
-            new_sock = SocketTCP()
-            new_sock.bind((self.bind_addr[0], 0))
-            new_sock._conn_addr = addr_client
-            new_sock._seq_id = recv_seg.SEQ
-            # Manda mensaje y retorna el socket usado como canal de
-            # comunicación
-            new_sock._socket.sendto(recv_seg.to_bytes(), addr_client)
-            msg, _ = new_sock._socket.recvfrom(16)
-            ack_seg = new_sock.parse_segment(msg)
-            if ack_seg.flags == ACK:
-                new_sock._seq_id = ack_seg.SEQ
-                return (new_sock, new_sock.bind_addr)
+        
+        # Espera mensaje SYN
+        while True:
+            try:
+                msg, addr_client = self._socket.recvfrom(16)
+            except (TimeoutError, socket.timeout):
+                continue
+            
+            recv_seg = SocketTCP.parse_segment(msg)
+            if recv_seg.flags == SYN:
+                recv_seg.flags = SYN + ACK
+                recv_seg.SEQ += 1
                 
-            raise SegmentFlagsErr(
-                expected=ACK,
-                actual=ack_seg,
-                step="while completing the handshake's last step (ACK from client)"
-            )
+                new_sock = SocketTCP()
+                new_sock.bind((self.bind_addr[0], 0))
+                new_sock._conn_addr = addr_client
+                new_sock._seq_id = recv_seg.SEQ
+                new_sock.settimeout(self._timeout)
                 
-        raise SegmentFlagsErr(
-            expected=SYN,
-            actual=recv_seg.flags,
-            step="while expecting SYN request from client"
-        )
+                # Enviar SYN+ACK y esperar ACK final del handshake
+                while True:
+                    new_sock._socket.sendto(recv_seg.to_bytes(), addr_client)
+                    try:
+                        msg_ack, _ = new_sock._socket.recvfrom(16)
+                    except (TimeoutError, socket.timeout):
+                        print("DEBUG: Server accept timeout waiting for final ACK. Retrying SYN+ACK...")
+                        continue
+                    
+                    ack_seg = new_sock.parse_segment(msg_ack)
+                    if ack_seg.flags == ACK:
+                        new_sock._seq_id = ack_seg.SEQ
+                        print("DEBUG: Server handshake complete.")
+                        return (new_sock, new_sock.bind_addr)
+                    elif ack_seg.flags == SYN:
+                        # Re-recepción del SYN original por pérdida previa
+                        continue
+                    else:
+                        continue
 
     @classmethod
     def socket(cls, foo, bar) -> SocketTCP:
@@ -174,92 +176,114 @@ class SocketTCP:
         pass
 
     def close(self) -> None:
-        """Cierra la conexión"""
-        print("Closing Connection")
-        assert(self._seq_id)
+        """Cierra la conexión (Host A)"""
+        print("Closing Connection (Host A)")
+        assert self._seq_id is not None
+        
         fin_seg = Segment(self._seq_id, FIN)
-        while True:
-            print(self._conn_addr)
+        closed_normally = False
+        
+        # Reintentar hasta 3 veces esperando FIN+ACK
+        for attempt in range(3):
+            print(f"DEBUG: Host A sending FIN (Attempt {attempt + 1})")
             self._socket.sendto(fin_seg.to_bytes(), self._conn_addr)
-            recv_msg, _ = self._socket.recvfrom(16)
-            recv_seg = Segment.from_bytes(recv_msg)
-            if recv_seg.flags != FIN+ACK:
-                raise SegmentFlagsErr(
-                    expected=FIN+ACK, 
-                    actual=recv_seg, 
-                    step=f"while expecting server with addr {self._conn_addr[0]}:{self._conn_addr[1]} to respond FIN+ACK"
-                )
-            if recv_seg.SEQ != self._seq_id + 1:
-                raise SequenceErr(
-                    expected= self._seq_id + 1,
-                    actual= recv_seg.SEQ,
-                    step=f"after receiving SYN+ACK from server with addr {self._conn_addr[0]}:{self._conn_addr[1]}"
-                )
-            break
-        fin_seg.SEQ = self._seq_id + 2
-        # reset de flags
-        fin_seg.flags = 0
-        fin_seg.SYN = 0
-        fin_seg.ACK = 1
-        self._seq_id = fin_seg.SEQ
-        self._socket.sendto(fin_seg.to_bytes(), self._conn_addr)
+            try:
+                msg, _ = self._socket.recvfrom(16)
+            except (TimeoutError, socket.timeout):
+                print("DEBUG: Host A timeout waiting for FIN+ACK. Retrying FIN...")
+                continue
+            
+            recv_seg = Segment.from_bytes(msg)
+            if recv_seg.flags == FIN + ACK and recv_seg.SEQ == self._seq_id + 1:
+                closed_normally = True
+                break
+        
+        if closed_normally:
+            fin_seg.SEQ = self._seq_id + 2
+            fin_seg.flags = ACK
+            self._seq_id = fin_seg.SEQ
+            
+            # Enviar el ACK final 3 veces espaciadas por timeout
+            sleep_time = self._timeout if self._timeout is not None else 0.1
+            for ack_attempt in range(3):
+                print(f"DEBUG: Host A retransmitting final ACK (Attempt {ack_attempt + 1})")
+                self._socket.sendto(fin_seg.to_bytes(), self._conn_addr)
+                time.sleep(sleep_time)
+            print("Closing Connection (Host A) successfully.")
+        else:
+            print("WARNING: Host A failed to receive FIN+ACK after 3 attempts. Assuming connection closed by remote.")
+        
         self._conn_addr = ('notvalid', 8080)
-        print("Cerrando la conexión")
         self._socket.close()
 
     def recv_close(self) -> None:
-        # Espera recivir mensaje SYNchronize
-        msg, _ = self._socket.recvfrom(16)
-        recv_seg = SocketTCP.parse_segment(msg)
-        if recv_seg.flags == FIN and recv_seg.SEQ == self._seq_id:
-            recv_seg.flags = FIN+ACK
-            recv_seg.SEQ += 1
-            self._socket.sendto(recv_seg.to_bytes(), self._conn_addr)
-            msg, _ = self._socket.recvfrom(16)
-            ack_seg = Segment.from_bytes(msg)
-            if ack_seg.SEQ == recv_seg.SEQ + 1 and ack_seg.flags == ACK:
-                print("cerrando la conexión")
+        """Maneja el fin de conexión (Host B)"""
+        for attempt in range(3):
+            try:
+                msg, _ = self._socket.recvfrom(16)
+            except (TimeoutError, socket.timeout):
+                print("DEBUG: Host B timeout waiting for FIN. Assuming connection closed by remote.")
                 self._socket.close()
+                return
+            
+            recv_seg = SocketTCP.parse_segment(msg)
+            if recv_seg.flags == FIN and recv_seg.SEQ == self._seq_id:
+                recv_seg.flags = FIN + ACK
+                recv_seg.SEQ += 1
+                
+                # Enviar FIN+ACK y esperar ACK final hasta 3 timeouts
+                for ack_attempt in range(3):
+                    self._socket.sendto(recv_seg.to_bytes(), self._conn_addr)
+                    try:
+                        msg_ack, _ = self._socket.recvfrom(16)
+                    except (TimeoutError, socket.timeout):
+                        print(f"DEBUG: Host B timeout waiting for final ACK (Attempt {ack_attempt + 1}). Retrying FIN+ACK...")
+                        continue
+                    
+                    ack_seg = Segment.from_bytes(msg_ack)
+                    if ack_seg.SEQ == recv_seg.SEQ + 1 and ack_seg.flags == ACK:
+                        print("Closing Connection (Host B) successfully.")
+                        self._socket.close()
+                        return
+                
+                print("WARNING: Host B failed to receive final ACK after 3 attempts. Assuming connection closed by remote.")
+                self._socket.close()
+                return
+
+        print("WARNING: Host B failed to receive FIN after 3 attempts. Assuming connection closed by remote.")
+        self._socket.close()
 
     def send(self, message: bytes) -> None:
         """Manda un mensaje por el canal de comunicación establecido usando STOP & WAIT"""
         if not self._seq_id:
             raise Exception("No connection established")
         
-        # Usa Stop & Wait para mandar el primer segmento indicando el
-        # largo del mensaje, y luego, lo usa para mandar iterativamente
-        # el mensaje en paquetes pequeños
-        def _stop_and_wait(packet: bytes, expected_seq):
+        def _stop_and_wait(packet: bytes, expected_seq: int):
             while True:
-                # Bucle hasta recibir segmentos adecuados
                 self._socket.sendto(packet, self._conn_addr)
                 try:
                     recv_msg, _ = self._socket.recvfrom(16)
-                except TimeoutError: 
-                    # Vuelve a mandar mensaje en caso de timeout
+                except (TimeoutError, socket.timeout):
+                    print("DEBUG: Sender timeout. Retrying packet...")
                     continue
                 recv_seg = Segment.from_bytes(recv_msg)
                 if recv_seg.SEQ == expected_seq and recv_seg.flags == ACK:
-                    break # ACK recibido y secuencia correcta 
+                    break
            
         seg = Segment(seq=self._seq_id)
 
-        # Primer Segmento
+        # Primer Segmento: largo de mensaje
         seg.DTA_LEN = len(message)
         expected_seq = seg.SEQ + seg.DTA_LEN
         _stop_and_wait(seg.to_bytes(), expected_seq)
          
-        # Segmento recibido
-        # Separa el mensaje en trozos de 16 bytes
-        # y los manda mediante Stop & Wait
+        # Paquetes con datos (max 16 bytes)
         for i in range(0, len(message), 16):
             m = message[i:i+16]
             seg.DTA_LEN = len(m)
-            # armar paquete con segmento y mensaje
             msg = seg.to_bytes() + m
             expected_seq = seg.SEQ + seg.DTA_LEN
-            _stop_and_wait(msg, expected_seq) 
-            # actualizar secuencia para próximo paquete
+            _stop_and_wait(msg, expected_seq)
             seg.SEQ = expected_seq
             
         self._seq_id = seg.SEQ
@@ -267,44 +291,45 @@ class SocketTCP:
     def recv(self, buff_size: int) -> bytes:
         def _recv_seg() -> tuple[Segment, bytes]:
             while True:
-                # Recibir y parsear segmento y datos
-                recv_msg, _ = self._socket.recvfrom(5 + 16) # 5 == largo del segmento
+                try:
+                    recv_msg, _ = self._socket.recvfrom(5 + 16)
+                except (TimeoutError, socket.timeout):
+                    continue
+                
                 recv_seg = Segment.from_bytes(recv_msg)
                 dta = recv_msg[5:]
-                # Secuencia requerida para mandar ACK
                 ack_seq = recv_seg.SEQ + recv_seg.DTA_LEN 
-                # Mensaje nuevo: la secuencia recibida coincide con la guardada
                 is_new = recv_seg.SEQ == self._seq_id
-                # Mensaje duplicado: La secuencia de ACK coincide con la guardada
                 is_dup = ack_seq == self._seq_id
-                print(f"SEQ={recv_seg.SEQ} DTA_LEN={recv_seg.DTA_LEN} esperado={self._seq_id} dta={dta!r}")
-                if not (is_new or is_dup): # Mensaje de externo
+                
+                print(f"DEBUG: SEQ={recv_seg.SEQ} DTA_LEN={recv_seg.DTA_LEN} esperado={self._seq_id} dta={dta!r}")
+                if not (is_new or is_dup):
                     continue
-                # Manda ACK (ya sea nuevo o duplicado)
+                
                 ack = Segment(seq=ack_seq, flags=ACK)
-                self._socket.sendto(ack.to_bytes(), self._conn_addr)
-                # Si el mensaje recibido es nuevo retorna el segmento y los datos
-                # en la próxima llamada a _recv_seg se vuelve a mandar si no llegó la primera vez
+                try:
+                    self._socket.sendto(ack.to_bytes(), self._conn_addr)
+                except Exception as e:
+                    print(f"DEBUG: Failed to send ACK: {e}. Retrying ACK...")
+                    continue
+                
                 if is_new:
                     return recv_seg, dta
                 
-            
-        # Primer segmento recibido contiene los datos a recibir
         if self._remaining == 0 and len(self._buffer) == 0:
             recv_seg, _ = _recv_seg()
             self._remaining = recv_seg.DTA_LEN
+            
         target = min(self._remaining + len(self._buffer), buff_size)
         while len(self._buffer) < target:
-            # recibe los datos
             recv_seg, dta = _recv_seg()
-            assert(self._seq_id)
-            assert(recv_seg.DTA_LEN == len(dta))
-            # Actualiza el número de secuencia con 
+            assert self._seq_id is not None
+            assert recv_seg.DTA_LEN == len(dta)
             self._seq_id += len(dta)
             self._remaining -= len(dta)
             self._buffer += dta
+            
         msg, self._buffer = self._buffer[:target], self._buffer[target:] 
-        
         return msg
         
     @staticmethod
@@ -313,6 +338,6 @@ class SocketTCP:
         return Segment(seq, flags)
 
     @staticmethod
-    def parse_segment(seg: bytes, offset: int=0) -> Segment:
+    def parse_segment(seg: bytes, offset: int = 0) -> Segment:
         """Parsea bytes recibidos a un segmento"""
         return Segment.from_bytes(seg, offset)
