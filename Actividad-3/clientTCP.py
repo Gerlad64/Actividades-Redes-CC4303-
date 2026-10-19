@@ -26,7 +26,7 @@ if __name__ == '__main__':
     assert result
     print("Client: test: mandando mensajes pequeños")
     
-    client_socketTCP.settimeout(2.0)
+    client_socketTCP.settimeout(CLIENT_TIMEOUT)
     # test 1
     message = b"Mensje de len=16"
     client_socketTCP.send(message)
@@ -64,5 +64,5 @@ if __name__ == '__main__':
     sleep(0.5)
     client_socketTCP = socket()
     client_socketTCP.connect(SERVER_ADDRESS)
-    client_socketTCP.settimeout(2.0)
+    client_socketTCP.settimeout(CLIENT_TIMEOUT)
     client_socketTCP.send(quijote.encode())
