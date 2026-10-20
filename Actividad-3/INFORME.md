@@ -168,11 +168,18 @@ Las más relevantes son las siguiente:
   2. Se pueden mandar mensajes pequeños: Uno que está dentro del tamaño del buffer y otro que lo exede un poco
   3. Pueden cerrar la conexión: Los puertos solicitados son liberados
   4. Se puede mandar un mensaje grande
-- En una terminal ejecutar server.py y en otra client.py de esta forma:
+- Esta última prueba remplaza lo solicitado por:
   > python3 client.py < archivo.txt
 
-  Esta es la aplicación solicitada, que puede mandar un texto desde el cliente al servidor, 
-  como no se establece un protocolo, el servidor espera a recibir un EOF.
+  Ya que utiliza la función `recv_n_bytes` definida en la Actividad-1, que se encarga de llamar a recv múltiples veces
+  hasta recibir el mensaje completo. Para esto, se tiene precalculado el tamaño en bytes del mensaje que será mandado (`quijote.txt`), luego de que se recibe, se compara con el texto original para verificar que no existieron pérdidas. Para replicar la prueba con otro archivo, se calcula su tamaño de esta forma:
+  ```python
+  with open("archivo.txt", "r") as file:
+      archivo = file.read()
+      print(len(archivo.encode()))
+  ```
+  El resultado debe ser remplazado en `QUIJOTE_SIZE` en `config.py`, y cambiar manualmente "quijote.txt" por "archivo.txt" en 
+  `clientTCP.py` y `serverTCP.py`.
 
 - Las pruebas con pérdida de conexión fueron probadas usando netem, con 20% de perdida, 0.5 de delay y 2.0 de timeout para ambos pares.
   Los resultados pueden variar.
