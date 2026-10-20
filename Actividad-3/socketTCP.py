@@ -289,11 +289,12 @@ class SocketTCP:
                     break # ACK recibido y secuencia correcta
            
         seg = Segment(seq=self._seq_id)
+        seg.flags = ACK
 
         # Primer Segmento: largo de mensaje
         # Si el mensaje es grande, se debe mandar
         # también en pedazos para evitar overflow del segmento
-        header = str(len(message)).encode()
+        header = len(message).to_bytes(8, byteorder="big")
         chunks = [header] + [message[i:i+16] for i in range(0, len(message), 16)]
         for chunk in chunks:
             seg.DTA_LEN = len(chunk)
@@ -342,7 +343,7 @@ class SocketTCP:
             recv_seg, dta = _recv_seg()
             assert self._seq_id is not None
             self._seq_id += len(dta)
-            self._remaining = int(dta)
+            self._remaining = int.from_bytes(dta, byteorder="big")
             
         target = min(self._remaining + len(self._buffer), buff_size)
         while len(self._buffer) < target:
