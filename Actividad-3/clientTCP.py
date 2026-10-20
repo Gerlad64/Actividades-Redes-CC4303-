@@ -58,7 +58,6 @@ if __name__ == '__main__':
     print("Client: test: mandando mensaje grande")
     
     with open("quijote.txt", "r", encoding="utf-8") as file:
-        file.readline()
         quijote = file.read()
             
     sleep(0.5)
@@ -66,3 +65,5 @@ if __name__ == '__main__':
     client_socketTCP.connect(SERVER_ADDRESS)
     client_socketTCP.settimeout(CLIENT_TIMEOUT)
     client_socketTCP.send(quijote.encode())
+    sleep(0.5)
+    client_socketTCP.close()
