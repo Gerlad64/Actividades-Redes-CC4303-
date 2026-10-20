@@ -107,9 +107,9 @@ if __name__ == '__main__':
     
     connection_socketTCP.settimeout(SERVER_TIMEOUT)
     quijote_bytes, _ = recv_n_bytes(connection_socketTCP, 1024, QUIJOTE_SIZE)
+    connection_socketTCP.recv_close()
     assert len(quijote_bytes) == QUIJOTE_SIZE
     with open("quijote.txt", "r", encoding="utf-8") as file:
-        file.readline()
         quijote = file.read()
     assert quijote_bytes.decode() == quijote
     print("TODOS LOS TESTS PASARON")
