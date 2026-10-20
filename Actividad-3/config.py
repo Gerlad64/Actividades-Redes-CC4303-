@@ -5,3 +5,6 @@ SERVER_ADDRESS = (SERVER_IP, SERVER_PORT)
 
 CLIENT_TIMEOUT = 2.0
 SERVER_TIMEOUT = 2.0
+
+QUIJOTE_SIZE = 9216
+"""Tamaño en Bytes de quijote.txt"""
