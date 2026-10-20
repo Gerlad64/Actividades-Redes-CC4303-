@@ -1,4 +1,4 @@
-## Informe Actividad 1
+## Informe Actividad 3
 **Gerald Ponce Díaz**
 
 **github**: https://github.com/Gerlad64/Actividades-Redes-CC4303-
@@ -93,12 +93,59 @@ def parse_segment(seg: bytes, offset: int = 0) -> Segment:
 
 #### Diseño de Socket
 
+#### Implementación de `send` y `recv`
+
+Para la transmisión y recepción de mensajes de tamaño variable se implementó *Stop & Wait* mediante las siguientes consideraciones:
+
+**Transmisión (`send`):**
+Se utiliza la porción `DTA_LEN` de la cabecera del mensaje para indicar el tamaño del **área de datos** de cada segmento mandado. 
+El primer segmento corresponde al **largo total del mensaje** (en el área de datos), el cual tiene `DTA_LEN` de 8 (aunque en la mayoría de casos usa menos de 8 bytes).
+
+Luego, el mensaje original se divide en fragmentos de hasta 16 *bytes*. Cada fragmento se envía utilizando una función interna, 
+convenientemente llamada `_stop_and_wait`, que implementa stop & wait, es decir, 
+se encarga de retransmitir iterativamente hasta recibir el `ACK` con la secuencia esperada.
+
+**Recepción (`recv`):**
+Se manejó la recepción fragmentada mediante variables privadas de `SocketTCP`:
+
+* `_remaining`: Entero que almacena los bytes pendientes por recibir del mensaje actual.
+* `_buffer`: Almacena temporalmente los datos recibidos que aún no se retornan a la aplicación.
+
+Si `_remaining == 0` y el `_buffer` está vacío, el primer segmento recibido indica el tamaño del mensaje a procesar y se actualiza `_remaining`.
+
+Posteriormente, se entra a un ciclo recibiendo datos hasta cumplir con la cantidad solicitada (`target = min(_remaining + len(_buffer), buff_size)`).
+
+**Gestión de bytes sobrantes:**
+Si el tamaño del mensaje recibido excede el `buff_size` solicitado, los datos son guardados en `_buffer` en lugar de descartarlos. Se retorna solo hasta el tamaño del buffer:
+
+```python
+msg, self._buffer = self._buffer[:target], self._buffer[target:] 
+return msg
+```
+
+Esto asegura que la siguiente llamada a `recv` obtenga inmediatamente los bytes sobrantes directamente de `self._buffer` sin pérdida de datos en la capa de aplicación.
+
+
 
 #### Información de DEBUG
+
+* **Modo Debug y Pérdidas de red:** Se implementa un rastreo de eventos a través de prints, con prefijo `DEBUG:` y `WARNING:` para evidenciar el comportamiento ante pérdidas. Esto permite observar:
+
+1. **Trazabilidad de secuencias:** En `_recv_seg()`, se imprime el número de secuencia recibido, el tamaño de los datos y la secuencia esperada (`esperado=self._seq_id`). Esto evidencia si el segmento recibido es nuevo, duplicado o externo.
+
+2. **Timeout y Retransmisión:** Se imprimen mensajes cuando ocurre un `TimeoutError` en `_stop_and_wait` o durante el cierre de conexión, visibilizando la retransmisión de paquetes o el reenvío de `FIN` y `ACK`.
 
 ### Diagramas Solicitados
 **Handshake sin pérdidas**:
 ![handhsake-sin-perdidas](handshake-sin-perdidas.jpeg)
+
+**Pérdida de último ACK**:
+![last-ack](last-ack.jpeg)
+En el último paso del handshake, el servidor solo espera recibir un ACK, ya que
+el número de secuencia que guardará será el que llega por este mensaje. Entonces,
+la solución propuesta es que `send` mande todos los segmentos con la flag ACK para que
+`accept` pueda terminar el handshake. Esto no es problema, ya que `recv` no revisa las 
+flags que le llegan.
 
 ### Dependencias y Entorno
 Se probó con `python` 3.13 y 3.14 sin librerías externas, y en los sitemas operativos MacOS y Linux. 
@@ -135,7 +182,6 @@ Las más relevantes son las siguiente:
   tests de un mensaje de tamaño 19. Se solucionó mandando el tamaño del mensaje como un mensaje más. Esto si estaba en el 
   enunciado, pero no de forma tan evidente para haber atajado este overflow.
 
-  
 
 ### Uso de IA
 Para esta actividad he usado la IA para consultas sobre código, ayudarme a estructurar mi diseño, debug y generación de código mínima,
