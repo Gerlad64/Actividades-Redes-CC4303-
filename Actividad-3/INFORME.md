@@ -171,7 +171,8 @@ Las más relevantes son las siguiente:
 - En una terminal ejecutar server.py y en otra client.py de esta forma:
   > python3 client.py < archivo.txt
 
-  Esta es la aplicación solicitada, que puede mandar un texto desde el cliente al servidor
+  Esta es la aplicación solicitada, que puede mandar un texto desde el cliente al servidor, 
+  como no se establece un protocolo, el servidor espera a recibir un EOF.
 
 - Las pruebas con pérdida de conexión fueron probadas usando netem, con 20% de perdida, 0.5 de delay y 2.0 de timeout para ambos pares.
   Los resultados pueden variar.
