@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from ipaddress import ip_address, ip_network
 from pathlib import Path
 
 
@@ -23,15 +24,32 @@ class RouterEntry:
         """Devuelve True si la dirección IP de addr pertenece a '{self.DST_IP}/{self.DST_IP_RANGE}' 
         y el puerto pertenece a self.DST_PORT_RANGE
         """
-        #TODO
-        return False
+        ip, port = addr
+        network = ip_network(f"{self.DST_IP}/{self.DST_IP_RANGE}", strict=False)
+        low, high = self.DST_PORT_RANGE
+        return ip_address(ip) in network and low <= port <= high
 
-@dataclass
 class RouterTable:
-    TABLE: list[RouterEntry]
     
     def __init__(self, table_path: Path):
-        pass
+        self.TABLE = []
+        with open(table_path, encoding="utf-8") as f:
+            for line in f:
+                line = line.split("#", 1)[0].strip()  # quita comentarios y espacios
+                if not line:
+                    continue
+                # formato: <ip>/<rango> <puerto_min> <puerto_max> <fwd_ip> <fwd_puerto>
+                cidr, port_min, port_max, fwd_ip, fwd_port = line.split()
+                dst_ip, ip_range = cidr.split("/")
+                self.TABLE.append(
+                    RouterEntry(
+                        DST_IP=dst_ip,
+                        DST_IP_RANGE=int(ip_range),
+                        DST_PORT_RANGE=(int(port_min), int(port_max)),
+                        FWD_IP=fwd_ip,
+                        FWD_PORT=int(fwd_port),
+                    )
+                )
 
     def check_table(self, dst_addr: tuple[str, int]) -> tuple[str, int] | None:
         for r_entry in self.TABLE:
