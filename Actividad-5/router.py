@@ -3,7 +3,7 @@ import socket
 import sys
 
 from config import *
-from ip import Packet
+from packet.packet import Packet
 from router_table import RouterTable
 
 
