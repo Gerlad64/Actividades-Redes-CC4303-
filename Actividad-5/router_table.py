@@ -51,7 +51,7 @@ class RouterTable:
                     )
                 )
 
-    def check_table(self, dst_addr: tuple[str, int]) -> tuple[str, int] | None:
+    def check(self, dst_addr: tuple[str, int]) -> tuple[str, int] | None:
         for r_entry in self.TABLE:
             if dst_addr in r_entry:
                 return r_entry.FWD_ADDR # --> (next_hop_IP, next_hop_ PORT)
