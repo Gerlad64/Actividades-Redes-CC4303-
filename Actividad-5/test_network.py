@@ -56,6 +56,25 @@ def example_2() -> None:
     stop_routers(pids)
 
 
+def round_robin_1() -> None:
+    print("\n===== Paso 8, Test 1: red de 5 routers =====", flush=True)
+    pids = start_routers([(8880 + i, f"rutas_R{i}_v3.txt") for i in range(1, 6)])
+    for i in range(4):
+        send(IP, 8885, f"R1->R5 #{i}", IP, 8881)
+    stop_routers(pids)
+
+
+def round_robin_2() -> None:
+    print("\n===== Paso 8, Test 2: red de 7 routers (R0 y R6) =====", flush=True)
+    pids = start_routers([(8880 + i, f"rutas_R{i}_v4.txt") for i in range(7)])
+    for i in range(4):
+        send(IP, 8885, f"R1->R5 #{i}", IP, 8881)
+        send(IP, 8881, f"R5->R1 #{i}", IP, 8885)
+    stop_routers(pids)
+
+
 if __name__ == "__main__":
     example_1()
     example_2()
+    round_robin_1()
+    round_robin_2()
