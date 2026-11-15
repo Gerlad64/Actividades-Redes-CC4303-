@@ -118,6 +118,54 @@ antes de llegar (por ejemplo `R2 -> R3 -> R2 -> R4 -> R2 -> R3 -> R5`). Round-ro
 no evita los ciclos: un paquete solo llega porque la alternancia termina sacándolo
 del ciclo.
 
+#### Router Default
+
+El router default está en `(127.0.0.1, 7000)` y está conectado a los 5 routers de
+la red del paso 8. Se agregó cambiando solo las tablas de rutas
+(`routes/rutas_R{1..5}_v5.txt` y `routes/rutas_default_v5.txt`), sin código nuevo.
+
+Cada tabla `rutas_Rn_v5.txt` es la tabla `rutas_Rn_v3.txt` con una línea más al
+final, la ruta default:
+
+```text
+0.0.0.0/0 0 65535 127.0.0.1 7000
+```
+
+La red `0.0.0.0/0` contiene todas las IP y el rango `0-65535` todos los puertos,
+así que esta ruta calza con cualquier destino. Por ejemplo, la tabla de `R2` queda:
+
+```text
+# archivo rutas_R2_v5.txt
+127.0.0.1/24 8881 8881 127.0.0.1 8881
+127.0.0.1/24 8883 8885 127.0.0.1 8883
+127.0.0.1/24 8883 8885 127.0.0.1 8884
+0.0.0.0/0 0 65535 127.0.0.1 7000
+```
+
+El router default tiene una ruta directa hacia cada router de la red, y ninguna ruta
+default propia: un paquete que llega a él sin ser para él no tiene a dónde ir y se
+descarta.
+
+```text
+# archivo rutas_default_v5.txt
+127.0.0.1/24 8881 8881 127.0.0.1 8881
+127.0.0.1/24 8882 8882 127.0.0.1 8882
+127.0.0.1/24 8883 8883 127.0.0.1 8883
+127.0.0.1/24 8884 8884 127.0.0.1 8884
+127.0.0.1/24 8885 8885 127.0.0.1 8885
+```
+
+**¿En qué posición de la tabla debería ir la ruta default?** En la última línea.
+`RouterTable.check` recorre la tabla en orden y usa la primera entrada que contiene
+el destino. Como la ruta default contiene cualquier destino, si estuviera antes que
+otra ruta, esa ruta nunca se usaría y todo el tráfico se iría al router default.
+Al final, solo se usa cuando ninguna otra ruta calza.
+
+En la prueba, un paquete hacia `(127.0.0.1, 9000)` entra por `R1` y otro hacia
+`(10.0.0.1, 8881)` entra por `R5`. Ambos se envían directo al router default, que
+no tiene ruta para ellos. Un paquete de `R1` a `R5` sigue usando las rutas de la
+red, sin pasar por el default.
+
 
 ### Similitudes y Diferencias con Tablas de Rutas Reales
 

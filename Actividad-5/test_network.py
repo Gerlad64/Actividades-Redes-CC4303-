@@ -113,8 +113,29 @@ def round_robin_2() -> None:
     stop_routers(pids)
 
 
+def default_router() -> None:
+    """Paso 9: red de 5 routers con un router default en (IP, 7000) conectado a todos ellos.
+    Envía paquetes a direcciones fuera de la red y verifica que terminan en el router default.
+    Tablas de rutas:
+        R1 (8881): rutas_R1_v5.txt
+        R2 (8882): rutas_R2_v5.txt
+        R3 (8883): rutas_R3_v5.txt
+        R4 (8884): rutas_R4_v5.txt
+        R5 (8885): rutas_R5_v5.txt
+        default (7000): rutas_default_v5.txt
+    """
+    print("\n===== Paso 9: router default =====", flush=True)
+    pids = start_routers([(8880 + i, f"rutas_R{i}_v5.txt") for i in range(1, 6)] + [(7000, "rutas_default_v5.txt")])
+    send(IP, 9000, "fuera", IP, 8881)
+    send("10.0.0.1", 8881, "fuera", IP, 8885)
+    send(IP, 7000, "a default", IP, 8883)
+    send(IP, 8885, "R1->R5", IP, 8881)
+    stop_routers(pids)
+
+
 if __name__ == "__main__":
     example_1()
     example_2()
     round_robin_1()
     round_robin_2()
+    default_router()
