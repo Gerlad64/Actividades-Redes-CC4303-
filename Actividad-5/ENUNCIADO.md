@@ -175,7 +175,19 @@ Con esto el header ocupa **6 bytes** (4 bytes para IP, 2 bytes para puerto) y lo
 > 
 
 
-8. **Red de 5 routers y Round-Robin:** Considere la estructura de 5 routers cuyas tablas de ruta están en la sección *Material e indicaciones para la actividad* (*[Imagen: estructura de 5 routers]*). Modifique `check_routes` para que, cuando exista más de una ruta posible para *forwardear* un paquete, alterne entre ellas usando **round-robin**. Esta funcionalidad debe funcionar para un número arbitrario de rutas posibles y recordar de forma independiente la última ruta tomada para cada 'área de la red'. **Incluya una breve descripción en su informe sobre la decisión de diseño para manejar round-robin**.
+8. **Red de 5 routers y Round-Robin:** Considere la estructura de 5 routers cuyas tablas de ruta están en la sección *Material e indicaciones para la actividad*.
+   ```text
+    R1 <------->   R2  <------->  R3
+    
+                   ^              ^
+    
+                   |              |
+    
+                   v              v
+    
+                  R4 <---------> R5
+   ```
+   Modifique `check_routes` para que, cuando exista más de una ruta posible para *forwardear* un paquete, alterne entre ellas usando **round-robin**. Esta funcionalidad debe funcionar para un número arbitrario de rutas posibles y recordar de forma independiente la última ruta tomada para cada 'área de la red'. **Incluya una breve descripción en su informe sobre la decisión de diseño para manejar round-robin**.
 
 
 > **Test 1:** Envíe varios paquetes desde `R1` hacia `R5` y verifique que `R2` cicla entre los caminos posibles. *(Pregunta de reflexión no obligatoria para el informe: luego de implementar round-robin, ¿puede ocurrir que un paquete quede dando vueltas por su red?)*
