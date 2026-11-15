@@ -1,6 +1,22 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 from ipaddress import ip_address, ip_network
+from itertools import cycle
 from pathlib import Path
+from typing import NamedTuple
+
+
+class NetworkArea(NamedTuple):
+    """Área de la red: conjunto de direcciones de destino que cubre una entrada de la tabla de rutas.
+    Entradas con igual área son caminos alternativos y se alternan con round-robin.
+    Es inmutable y hasheable, por lo que sirve como llave de diccionario.
+    """
+    DST_IP: str
+    """IP de destino del área"""
+    DST_IP_RANGE: int
+    """Rango de IPs de destino. ej: 24 establece el rango a.b.c.d/24"""
+    DST_PORT_RANGE: tuple[int, int]
+    """Rango de puertos de destino: ej: (8880, 8882), entonces el rango es {8880,8881,8882}"""
 
 
 @dataclass
@@ -19,6 +35,11 @@ class RouterEntry:
     @property
     def FWD_ADDR(self) -> tuple[str, int]:
         return (self.FWD_IP, self.FWD_PORT)
+
+    @property
+    def AREA(self) -> NetworkArea:
+        """Área de la red que cubre la entrada: rutas con igual área son caminos alternativos."""
+        return NetworkArea(self.DST_IP, self.DST_IP_RANGE, self.DST_PORT_RANGE)
 
     def __contains__(self, addr: tuple[str, int]) -> bool:
         """Devuelve True si la dirección IP de addr pertenece a '{self.DST_IP}/{self.DST_IP_RANGE}' 
@@ -50,9 +71,17 @@ class RouterTable:
                         FWD_PORT=int(fwd_port),
                     )
                 )
+        # agrupa las rutas por área y las recorre en una lista circular (round-robin)
+        areas: dict[NetworkArea, list[RouterEntry]] = {}
+        for r_entry in self.TABLE:
+            areas.setdefault(r_entry.AREA, []).append(r_entry)
+        self.ROUND_ROBIN: dict[NetworkArea, Iterator[RouterEntry]] = {
+            area: cycle(entries) for area, entries in areas.items()
+        }
 
     def check(self, dst_addr: tuple[str, int]) -> tuple[str, int] | None:
+        """Retorna el siguiente salto hacia dst_addr, alternando con round-robin entre las rutas de su área."""
         for r_entry in self.TABLE:
             if dst_addr in r_entry:
-                return r_entry.FWD_ADDR # --> (next_hop_IP, next_hop_ PORT)
+                return next(self.ROUND_ROBIN[r_entry.AREA]).FWD_ADDR # --> (next_hop_IP, next_hop_ PORT)
         return None
