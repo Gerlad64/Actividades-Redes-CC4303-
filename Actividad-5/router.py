@@ -6,31 +6,35 @@ from config import *
 from ip import Packet
 from router_table import RouterTable
 
-if __name__ == '__main__':
-    router_ip = sys.argv[1]
-    router_port = int(sys.argv[2])
+
+def network(router_ip: str, router_port: int, router_routes: str) -> None:
+    """Levanta un router en (router_ip, router_port) que hace forwarding según la tabla `router_routes`."""
     router_addr = (router_ip, router_port)
-    router_routes = sys.argv[3]
-    
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     table = RouterTable(ROUTES_PATH / router_routes)
-    
+
     sock.bind((router_ip, router_port))
     print(BANNER)
     while True:
         try:
             msg, _ = sock.recvfrom(16)
             packet = Packet.from_bytes(msg)
+            packet_str = f"{packet.ADDR[0]};{packet.ADDR[1]};{packet.msg.decode()}"
             if packet.ADDR == router_addr:
                 m = packet.msg.decode()
                 print("paquete recibido:" + m[:5] + ("..." if len(m) > 5 else ""))
             elif (next_hop := table.check(packet.ADDR)) is not None:
                 packet.sendto(sock, *next_hop)
-                print("...")
+                print(f"redirigiendo paquete {packet_str} con destino final {packet.ADDR} desde {router_addr} hacia {next_hop}")
             else:
-                print("No hay rutas hacia...")
-            
+                print(f"No hay rutas hacia {packet.ADDR} para paquete {packet_str}")
+
         except KeyboardInterrupt:
             break
-    
+
     sock.close()
+
+
+if __name__ == '__main__':
+    network(sys.argv[1], int(sys.argv[2]), sys.argv[3])
