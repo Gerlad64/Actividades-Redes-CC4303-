@@ -16,7 +16,7 @@ class Packet(ctypes.BigEndianStructure):
     _pack_ = 1
 
     
-    def __init__(self, ip: int, port: int, msg: bytes) -> None:
+    def __init__(self, ip: int, port: int, msg: bytes = b'') -> None:
         super().__init__(ip, port)
         self.msg: bytes = msg
     
@@ -37,10 +37,11 @@ class Packet(ctypes.BigEndianStructure):
     def to_bytes(self):
         return bytes(memoryview(self)) + self.msg
 
-    def send(self, sock: socket.socket) -> None:
-        """Manda self.msg a la dirección self.IP:self.port usando un socket UDP ya creado."""
-        ip_str = socket.inet_ntoa(self.IP.to_bytes(4, byteorder="big"))
-        sock.sendto(self.to_bytes(), (ip_str, self.PORT))
-
-    @staticmethod
-    def sendto()
+    def sendto(self, sock: socket.socket, ip: str, port: int) -> None:
+        """Manda el paquete con dirección ip, puerto y mensaje almacenado en el objeto a otro router.
+        Params:
+            sock: socket no orientado a conexión por donde enviar el paquete
+            ip: IP de envío, no necesariamente es igual a self.IP
+            port: puerto de envío, no necesariamente es igual a self.PORT
+        """
+        sock.sendto(self.to_bytes(), (ip, port))
