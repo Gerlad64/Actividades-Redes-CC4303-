@@ -9,6 +9,8 @@ class Packet(ctypes.BigEndianStructure):
     Clase Packet del modulo ip.
     Maneja paquetes IP con dirección  y puerto
     """
+    IP: int
+    PORT: int
     
     _fields_ = [
         ("IP", ctypes.c_uint32),
@@ -16,6 +18,10 @@ class Packet(ctypes.BigEndianStructure):
     ]
     _pack_ = 1
 
+
+    @property
+    def ADDR(self) -> tuple[str, int]:
+        return (socket.inet_ntoa(self.IP.to_bytes(4, byteorder='big')), self.PORT)
     
     def __init__(self, ip: int, port: int, msg: bytes = b'') -> None:
         super().__init__(ip, port)
@@ -23,7 +29,7 @@ class Packet(ctypes.BigEndianStructure):
     
     
     @classmethod
-    def from_bytes(cls, IP_packet: bytes, offset: int = 0):
+    def from_bytes(cls, IP_packet: bytes, offset: int = 0) -> Packet:
         """Crea un paquete a partir de bytes."""
         ip_start   = offset
         ip_end     = offset+4
@@ -35,7 +41,7 @@ class Packet(ctypes.BigEndianStructure):
             IP_packet[port_end:]
         )
 
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         return bytes(memoryview(self)) + self.msg
 
     def sendto(self, sock: socket.socket, ip: str, port: int) -> None:
