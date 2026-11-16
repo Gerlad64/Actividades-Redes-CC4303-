@@ -17,7 +17,7 @@ def network(router_ip: str, router_port: int, router_routes: str) -> None:
     sock.bind((router_ip, router_port))
     while True:
         try:
-            msg, _ = sock.recvfrom(32)
+            msg, _ = sock.recvfrom(SOCK_BUFFER_SIZE)
             packet = Packet.from_bytes(msg)
             packet_str = f"{packet.ADDR[0]};{packet.ADDR[1]};{packet.TTL};{packet.msg.decode()}"
             if packet.TTL == 0:
