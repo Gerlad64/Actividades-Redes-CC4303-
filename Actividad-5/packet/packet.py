@@ -11,10 +11,12 @@ class Packet(ctypes.BigEndianStructure):
     """
     IP: int
     PORT: int
+    TTL: int
     
     _fields_ = [
         ("IP", ctypes.c_uint32),
         ("PORT", ctypes.c_uint16),
+        ("TTL", ctypes.c_uint8)
     ]
     _pack_ = 1
 
@@ -23,8 +25,8 @@ class Packet(ctypes.BigEndianStructure):
     def ADDR(self) -> tuple[str, int]:
         return (socket.inet_ntoa(self.IP.to_bytes(4, byteorder='big')), self.PORT)
     
-    def __init__(self, ip: int, port: int, msg: bytes = b'') -> None:
-        super().__init__(ip, port)
+    def __init__(self, ip: int, port: int, msg: bytes = b'', ttl: int = 0) -> None:
+        super().__init__(ip, port, ttl)
         self.msg: bytes = msg
     
     
@@ -35,10 +37,13 @@ class Packet(ctypes.BigEndianStructure):
         ip_end     = offset+4
         port_start = offset+4
         port_end   = offset+6
+        ttl_start  = offset+6
+        ttl_end    = offset+7
         return Packet(
             int.from_bytes(IP_packet[ip_start: ip_end]), 
             int.from_bytes(IP_packet[port_start: port_end]), 
-            IP_packet[port_end:]
+            IP_packet[ttl_end:],
+            int.from_bytes(IP_packet[ttl_start: ttl_end])
         )
 
     def to_bytes(self) -> bytes:
