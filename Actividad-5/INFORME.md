@@ -4,9 +4,55 @@
 **github**: https://github.com/Gerlad64/Actividades-Redes-CC4303-
 
 
-### Documentación y Diseño
+### Documentación y diseño
 
-#### Script Emisor de Mensajes
+| Archivo | Contenido |
+| :--- | :--- |
+| `router.py` | **Punto de entrada.** Función `network`: el router y su loop de recepción y *forwarding*. |
+| `router_table.py` | `RouterTable`, `RouterEntry` y `NetworkArea`: lectura de la tabla de rutas, búsqueda y round-robin. `RouterTable.check` cumple el rol de `check_routes`. |
+| `packet/packet.py` | `Packet`: header IP en bytes. `Packet.from_bytes` cumple el rol de `parse_packet` y `Packet.to_bytes` el de `create_packet`. |
+| `packet/send.py` | Script emisor de mensajes (función `send`). |
+| `config.py` | `ROUTES_PATH` (carpeta de las tablas de rutas) y `BANNER`. |
+| `routes/` | Tablas de rutas (`rutas_Rn_vk.txt`). |
+| `test_network.py` | Pruebas: levanta los routers con `fork` y les envía paquetes. |
+| `bad_routers.txt`, `hops_5_routers.txt`, `hops_7_routers.txt` | Salidas de las pruebas sin TTL. |
+
+Un router se levanta con:
+
+```bash
+python3 router.py <router_IP> <router_puerto> <archivo_rutas>
+```
+
+#### Tabla de rutas: similitudes y diferencias con una tabla real
+
+**Similitudes:**
+- Cada línea asocia una red de destino con un siguiente salto (*gateway*), igual
+  que las columnas `Destination` y `Gateway` de una tabla real.
+- El router solo conoce el siguiente salto, no el camino completo hasta el destino.
+- La red de destino se escribe en notación CIDR (`127.0.0.1/24`).
+- Si ningún destino calza, el paquete se descarta. Igual que en una tabla real,
+  se puede agregar una ruta default (`0.0.0.0/0`) para no descartarlo (paso 9).
+
+**Diferencias:**
+- **Rangos de puertos en vez de rangos de IP.** Todos los routers comparten la IP
+  `127.0.0.1`, así que los hosts de una red se agrupan por rango de puertos. En
+  una red real el puerto es de la capa de transporte y el router no lo mira.
+- **Elección de la ruta.** Aquí se usa la primera línea que calza, en orden. Un
+  router real usa la ruta con el prefijo más largo (*longest prefix match*), sin
+  importar el orden de las líneas.
+- **Columnas.** Una tabla real también indica la interfaz de salida, una métrica
+  y flags. Aquí solo hay destino y siguiente salto.
+- **Origen de las rutas.** Aquí la tabla es un archivo estático escrito a mano.
+  Una tabla real también se llena con protocolos de ruteo (RIP, OSPF, BGP) y se
+  actualiza si cae un enlace. Por eso, un error como el de la prueba 1 de las
+  pruebas sin TTL queda fijo hasta que alguien edite el archivo.
+- **Redes conectadas directamente.** Una tabla real incluye automáticamente las
+  redes de sus interfaces. Aquí cada vecino necesita su propia línea.
+- **Varios caminos.** Aquí se alterna por paquete con round-robin (paso 8). Un
+  router real que reparte carga entre caminos suele mantener los paquetes de un
+  mismo flujo por el mismo camino para no desordenarlos.
+
+#### Script emisor de mensajes
 
 El script emisor está en `packet/send.py`. Construye un paquete IP con la
 dirección del router de destino final y lo envía a un router de entrada,
@@ -74,31 +120,15 @@ Por línea de comandos va como sexto argumento opcional:
 python3 -m packet.send 127.0.0.1 8883 hola 127.0.0.1 8881 1
 ```
 
-El valor por defecto mantiene las pruebas de la Parte I sin cambios. Además,
-`Packet` usa `ttl=0` por defecto, por lo que sin este valor los routers
-descartarían todos los paquetes.
+El valor por defecto mantiene las pruebas de la Parte I sin cambios, porque no
+necesitan indicar un TTL.
 
-#### Round-Robin
+#### Round-robin
 
 El round-robin está en `RouterTable` (`router_table.py`). Cada entrada de la tabla
-define un *área de la red*, que se representa con la clase `NetworkArea`:
-
-```python
-class NetworkArea(NamedTuple):
-    DST_IP: str
-    DST_IP_RANGE: int
-    DST_PORT_RANGE: tuple[int, int]
-```
-
-Sus atributos tienen los mismos nombres que en `RouterEntry`, que la construye
-en la propiedad `RouterEntry.AREA`. Si dos o más entradas tienen la misma área,
-son caminos alternativos hacia ese mismo conjunto de routers.
-
-`NetworkArea` hereda de `NamedTuple` por dos razones:
-- **Legibilidad:** el tipo se lee como `NetworkArea` y no como
-  `tuple[str, int, tuple[int, int]]`, y sus campos se acceden por nombre.
-- **Llave de diccionario:** sigue siendo una tupla inmutable y hasheable, así que
-  dos áreas con los mismos valores son la misma llave.
+define un *área de la red* (`NetworkArea`, ver
+[Clases y estructuras](#clases-y-estructuras)). Si dos o más entradas tienen la
+misma área, son caminos alternativos hacia ese mismo conjunto de routers.
 
 Al leer la tabla, las entradas se agrupan por área y cada grupo queda en una lista
 circular (`itertools.cycle`):
@@ -136,7 +166,7 @@ antes de llegar (por ejemplo `R2 -> R3 -> R2 -> R4 -> R2 -> R3 -> R5`). Round-ro
 no evita los ciclos: un paquete solo llega porque la alternancia termina sacándolo
 del ciclo.
 
-#### Router Default
+#### Router default
 
 El router default está en `(127.0.0.1, 7000)` y está conectado a los 5 routers de
 la red del paso 8. Se agregó cambiando solo las tablas de rutas
@@ -185,13 +215,186 @@ no tiene ruta para ellos. Un paquete de `R1` a `R5` sigue usando las rutas de la
 red, sin pasar por el default.
 
 
-### Similitudes y Diferencias con Tablas de Rutas Reales
+### Clases y estructuras
 
-En esta versión se utilizan rangos de puertos en lugar de rangos de IP para simular
-routers, ya que todo se trabaja de manera local y no existen interfaces de red
+#### `Packet` (`packet/packet.py`)
+
+```python
+class Packet(ctypes.BigEndianStructure):
+    IP: int
+    PORT: int
+    TTL: int
+
+    _fields_ = [
+        ("IP", ctypes.c_uint32),
+        ("PORT", ctypes.c_uint16),
+        ("TTL", ctypes.c_uint8)
+    ]
+    _pack_ = 1
+
+    def __init__(self, ip: int, port: int, msg: bytes = b'', ttl: int = 64) -> None:
+        super().__init__(ip, port, ttl)
+        self.msg: bytes = msg
+```
+
+El header ocupa 7 bytes: 4 de IP, 2 de puerto y 1 de TTL. Hereda de
+`ctypes.BigEndianStructure` para que los campos se escriban en orden de red
+(*big endian*), y `_pack_ = 1` evita que `ctypes` agregue bytes de relleno entre
+campos.
+
+| Atributo | Tipo | Por qué |
+| :--- | :--- | :--- |
+| `IP` | `c_uint32` | Una IPv4 `a.b.c.d` son 4 bytes. Guardada como entero de 32 bits big endian, el 1er byte es `a` y el 4to es `d`, como pide el enunciado. `socket.inet_aton`/`inet_ntoa` hacen la conversión con el string. |
+| `PORT` | `c_uint16` | Los puertos van de 0 a 65535, justo lo que cabe en 2 bytes sin signo. |
+| `TTL` | `c_uint8` | El enunciado pide un entero entre 1 y 255 en 1 byte. Un byte sin signo cubre ese rango y también el 0 con que se descarta el paquete. |
+| `msg` | `bytes` | El mensaje tiene largo variable, así que no puede ir en `_fields_`. Se guarda como `bytes` porque es lo que entrega y recibe el socket. |
+
+`from_bytes` lee los 7 bytes del header y deja el resto en `msg`. `to_bytes`
+concatena el header (`bytes(memoryview(self))`) con `msg`. `ADDR` entrega el
+destino como `(ip, puerto)`, el mismo formato que usan los sockets y la tabla de
+rutas.
+
+#### `RouterEntry`, `NetworkArea` y `RouterTable` (`router_table.py`)
+
+`RouterEntry` es una línea de la tabla de rutas:
+
+```python
+@dataclass
+class RouterEntry:
+    DST_IP:   str
+    DST_IP_RANGE: int
+    DST_PORT_RANGE: tuple[int, int]
+    FWD_IP: str
+    FWD_PORT: int
+```
+
+| Atributo | Tipo | Por qué |
+| :--- | :--- | :--- |
+| `DST_IP` | `str` | Se usa con `ipaddress.ip_network(f"{DST_IP}/{DST_IP_RANGE}")`, que recibe strings. |
+| `DST_IP_RANGE` | `int` | Es el largo del prefijo CIDR (por ejemplo, 24). |
+| `DST_PORT_RANGE` | `tuple[int, int]` | Los dos extremos del rango de puertos, incluidos. Una tupla es inmutable, así que sirve como parte de una llave de diccionario (`NetworkArea`). |
+| `FWD_IP`, `FWD_PORT` | `str`, `int` | El siguiente salto. `FWD_ADDR` los junta en `(ip, puerto)`, listo para `socket.sendto`. |
+
+`RouterEntry` es un `dataclass` porque solo guarda datos y así se evita escribir
+el `__init__`. `__contains__` permite escribir `dst_addr in r_entry`.
+
+`NetworkArea` agrupa los tres campos de destino (`DST_IP`, `DST_IP_RANGE`,
+`DST_PORT_RANGE`). Se construye en la propiedad `RouterEntry.AREA` y hereda de
+`NamedTuple` por dos razones:
+- **Legibilidad:** el tipo se lee como `NetworkArea` y no como
+  `tuple[str, int, tuple[int, int]]`, y sus campos se acceden por nombre.
+- **Llave de diccionario:** sigue siendo una tupla inmutable y hasheable, así que
+  dos áreas con los mismos valores son la misma llave.
+
+`RouterTable` tiene dos atributos:
+
+| Atributo | Tipo | Por qué |
+| :--- | :--- | :--- |
+| `TABLE` | `list[RouterEntry]` | Una lista mantiene el orden del archivo, y las rutas se revisan en orden descendente. |
+| `ROUND_ROBIN` | `dict[NetworkArea, Iterator[RouterEntry]]` | Un `cycle` por área guarda por separado en qué ruta quedó cada área. |
+
+
+### Flujo
+
+Cada router (`network` en `router.py`) abre un socket UDP en
+`(router_IP, router_puerto)`, carga su tabla de rutas y queda en un loop
+bloqueante con `recvfrom`. Por cada paquete recibido:
+
+1. Lo convierte con `Packet.from_bytes`.
+2. Si `TTL == 0`, lo descarta e imprime `Se recibió paquete ... con TTL 0`.
+3. Si el destino del header es el propio router, imprime el mensaje sin headers.
+4. Si no, busca el siguiente salto con `RouterTable.check`. Si hay ruta, resta 1
+   al TTL y reenvía el paquete por el mismo socket. Si no hay ruta, imprime
+   `No hay rutas hacia ...` y lo descarta.
+
+```python
+if packet.TTL == 0:
+    print(f"Se recibió paquete {packet_str} con TTL 0")
+elif packet.ADDR == router_addr:
+    print("paquete recibido:" + packet.msg.decode())
+elif (next_hop := table.check(packet.ADDR)) is not None:
+    packet.TTL -= 1
+    packet.sendto(sock, *next_hop)
+```
+
+El TTL se revisa antes que el destino. Por eso un paquete también se descarta si
+llega a su destino con TTL 0, y para recorrer *n* saltos necesita un TTL de al
+menos *n*+1.
+
+`recvfrom(32)` recibe hasta 32 bytes: 7 de header y hasta 25 de mensaje. Un
+mensaje más largo se corta.
+
+El loop termina con `Ctrl+C` (`KeyboardInterrupt`), que cierra el socket.
+
+
+### Dependencias y entorno
+
+- Probado con Python 3.15.2 en macOS. Requiere Python 3.13 o superior.
+- Solo usa la biblioteca estándar: `socket`, `sys`, `ctypes`, `dataclasses`,
+  `ipaddress`, `itertools`, `pathlib`, `typing` y `collections.abc`. Las pruebas
+  también usan `os`, `signal` y `time`.
+- `test_network.py` usa `os.fork`, que solo existe en sistemas tipo Unix.
+
+
+### Configuración y ejecución
+
+Las tablas de rutas están en `routes/`. `config.py` define esa carpeta como
+`ROUTES_PATH`, así que `router.py` recibe solo el nombre del archivo. Cada línea
+tiene el formato:
+
+```text
+<red>/<prefijo> <puerto_inicial> <puerto_final> <ip_siguiente_salto> <puerto_siguiente_salto>
+```
+
+Todos los comandos se ejecutan desde `Actividad-5/`. Por ejemplo, para el ejemplo
+1, en dos terminales:
+
+```bash
+python3 router.py 127.0.0.1 8881 rutas_R1_v1.txt
+python3 router.py 127.0.0.1 8882 rutas_R2_v1.txt
+```
+
+En una tercera terminal, para enviar un mensaje:
+
+```bash
+python3 -m packet.send 127.0.0.1 8882 "hola R2!" 127.0.0.1 8881
+```
+
+Para correr todas las pruebas:
+
+```bash
+python3 test_network.py
+```
+
+Desde la raíz del repositorio, el código pasa:
+
+```bash
+ty check Actividad-5/
+ruff check Actividad-5/
+```
 
 
 ### Pruebas
+
+#### Pruebas de los pasos
+
+Cada función de `test_network.py` levanta los routers con `fork`, envía paquetes
+con `send` y detiene los routers con `SIGINT`:
+
+| Función | Paso | Qué verifica |
+| :--- | :--- | :--- |
+| `example_1` | Parte I, paso 7 | Ejemplo 1 (R1 ↔ R2): *forwarding*, entrega local y destino sin ruta. |
+| `example_2` | Parte I, paso 7 | Ejemplo 2 (R1 ↔ R2 ↔ R3): lo mismo, con un salto intermedio. |
+| `round_robin_1` | Parte I, paso 8, Test 1 | R2 cicla entre R3 y R4 para paquetes de R1 a R5. |
+| `round_robin_2` | Parte I, paso 8, Test 2 | Con R0 y R6, R2 cicla por separado en cada área (R1 → R5 y R5 → R1 intercalados). |
+| `default_router` | Parte I, paso 9 | Destinos fuera de la red terminan en el router default. |
+| `ttl_drop` | Parte II, pasos 2 y 3 | En el ejemplo 2, de R1 a R3: con TTL 1 lo descarta R2, con TTL 2 lo descarta R3 y con TTL 3 llega. |
+
+Para correr una sola:
+
+```bash
+python3 -c "import test_network as t; t.ttl_drop()"
+```
 
 #### Pruebas Mini-Internet sin TTL
 
@@ -213,9 +416,9 @@ PYTHONUNBUFFERED=1 python3 -c "import test_network as t; t.hops_5_routers()"
 PYTHONUNBUFFERED=1 python3 -c "import test_network as t; t.hops_7_routers()"
 ```
 
-Los primeros 4 comandos de bash configura una carpeta con la actividad en un momento
-donde `ttl` todavía no estaba implementado. Este momento esta marcado mediante el tag
-de git `Actividad-5-Parte-I`.
+Los primeros 4 comandos arman una carpeta con la actividad en el momento en que
+el TTL todavía no estaba implementado. Ese momento está marcado con el tag de git
+`Actividad-5-Parte-I`.
 
 `PYTHONUNBUFFERED=1` hace que cada router imprima apenas recibe un paquete, así
 las líneas salen en el orden real de los saltos.
@@ -256,7 +459,6 @@ El resultado de este experimento se encuentra en `bad_routers.txt`.
 - **¿Comparado con el mínimo?** El mínimo es 3 saltos (`R1 → R2 → R3 → R5` o
   `R1 → R2 → R4 → R5`). La mitad de los paquetes usa el camino mínimo y la otra
   mitad da más del doble de saltos.
-
 
 El resultado de este experimento se encuentra en `hops_5_routers.txt`.
 
@@ -335,3 +537,8 @@ Archivos de rutas creados para esta red:
 127.0.0.1/24 8883 8885 127.0.0.1 8883
 127.0.0.1/24 8883 8885 127.0.0.1 8882
 ```
+
+
+### Uso de IA
+
+[completar]
