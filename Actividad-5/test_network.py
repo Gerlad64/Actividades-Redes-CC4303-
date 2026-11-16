@@ -1,5 +1,6 @@
 import os
 import signal
+import subprocess
 import sys
 import time
 
@@ -196,6 +197,38 @@ def ttl_drop() -> None:
     stop_routers(pids)
 
 
+def bad_routes_ttl() -> None:
+    """Pruebas con TTL, prueba 1: igual que `bad_routes`, pero con TTL inicial 10.
+    El paquete de R1 a R3 rebota entre R1 y R2 hasta que su TTL llega a 0 y se descarta.
+    Tablas de rutas:
+        R1 (8881): rutas_R1_v2.txt
+        R2 (8882): rutas_R2_v2_error.txt
+        R3 (8883): rutas_R3_v2.txt
+    """
+    print("\n===== Pruebas con TTL 1: tabla de R2 mal configurada, TTL=10 =====", flush=True)
+    pids = start_routers([
+        (8881, "rutas_R1_v2.txt"),
+        (8882, "rutas_R2_v2_error.txt"),
+        (8883, "rutas_R3_v2.txt"),
+    ])
+    send(IP, 8881, "hola R1!", IP, 8883, ttl=10)
+    send(IP, 8883, "hola R3!", IP, 8881, ttl=10)
+    stop_routers(pids)
+
+
+def file_order() -> None:
+    """Pruebas con TTL, prueba 2: red de 5 routers. Envía mensajes.txt de R1 a R5 con prueba_router.py
+    (TTL 10) para observar el orden en que llegan los paquetes.
+    Tablas de rutas: rutas_R{1..5}_v3.txt
+    """
+    print("\n===== Pruebas con TTL 2: orden de paquetes en red de 5 routers =====", flush=True)
+    pids = start_routers([(8880 + i, f"rutas_R{i}_v3.txt") for i in range(1, 6)])
+    with open("mensajes.txt", encoding="utf-8") as f:
+        subprocess.run([sys.executable, "prueba_router.py", IP, "8885", "10", IP, "8881"], stdin=f, check=True)
+    time.sleep(1)
+    stop_routers(pids)
+
+
 if __name__ == "__main__":
     example_1()
     example_2()
@@ -206,3 +239,5 @@ if __name__ == "__main__":
     hops_5_routers()
     hops_7_routers()
     ttl_drop()
+    bad_routes_ttl()
+    file_order()

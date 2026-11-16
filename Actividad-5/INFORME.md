@@ -12,10 +12,13 @@
 | `router_table.py` | `RouterTable`, `RouterEntry` y `NetworkArea`: lectura de la tabla de rutas, búsqueda y round-robin. `RouterTable.check` cumple el rol de `check_routes`. |
 | `packet/packet.py` | `Packet`: header IP en bytes. `Packet.from_bytes` cumple el rol de `parse_packet` y `Packet.to_bytes` el de `create_packet`. |
 | `packet/send.py` | Script emisor de mensajes (función `send`). |
-| `config.py` | `ROUTES_PATH` (carpeta de las tablas de rutas) y `BANNER`. |
+| `prueba_router.py` | Script de pruebas por archivo (Parte II, paso 4): envía cada línea de `stdin` como un paquete. |
+| `config.py` | `ROUTES_PATH` (carpeta de las tablas de rutas), `SOCK_BUFFER_SIZE` (bytes que recibe un router por paquete) y `BANNER`. |
 | `routes/` | Tablas de rutas (`rutas_Rn_vk.txt`). |
 | `test_network.py` | Pruebas: levanta los routers con `fork` y les envía paquetes. |
+| `mensajes.txt` | Archivo de 30 líneas que se envía con `prueba_router.py`. |
 | `bad_routers.txt`, `hops_5_routers.txt`, `hops_7_routers.txt` | Salidas de las pruebas sin TTL. |
+| `bad_routers_ttl.txt`, `order_5_routers.txt` | Salidas de las pruebas con TTL. |
 
 Un router se levanta con:
 
@@ -122,6 +125,34 @@ python3 -m packet.send 127.0.0.1 8883 hola 127.0.0.1 8881 1
 
 El valor por defecto mantiene las pruebas de la Parte I sin cambios, porque no
 necesitan indicar un TTL.
+
+#### Script de pruebas por archivo (Parte II, paso 4)
+
+`prueba_router.py` lee un archivo línea por línea desde la entrada estándar
+(`stdin`) y envía cada línea como un paquete IP. Todos los paquetes llevan el
+mismo destino y TTL, y se envían al mismo router inicial:
+
+```bash
+python3 prueba_router.py <ip_destino> <puerto_destino> <ttl> <ip_router_inicial> <puerto_router_inicial> < archivo
+```
+
+Por ejemplo, para enviar `mensajes.txt` de `R1` a `R5` con TTL 10:
+
+```bash
+python3 prueba_router.py 127.0.0.1 8885 10 127.0.0.1 8881 < mensajes.txt
+```
+
+El enunciado no indica cómo se entrega el archivo, así que se lee con `stdin`
+y una redirección `<`. Así se mantiene la firma del enunciado, sin un argumento
+extra para el nombre del archivo. El enunciado escribe el header como un solo
+argumento `127.0.0.1;8885;10`. Aquí van como tres argumentos separados por
+espacios, igual que en `send.py`. Sin comillas, bash interpreta `;` como
+separador de comandos, y el argumento original no llegaría completo al script.
+
+A diferencia de `send`, que espera 0,3 s después de cada envío,
+`prueba_router.py` envía todas las líneas seguidas por un solo socket. Si
+esperara, cada paquete llegaría antes de que saliera el siguiente y no se
+podría observar el orden de llegada (prueba 2 con TTL).
 
 #### Round-robin
 
@@ -321,8 +352,8 @@ El TTL se revisa antes que el destino. Por eso un paquete también se descarta s
 llega a su destino con TTL 0, y para recorrer *n* saltos necesita un TTL de al
 menos *n*+1.
 
-`recvfrom(32)` recibe hasta 32 bytes: 7 de header y hasta 25 de mensaje. Un
-mensaje más largo se corta.
+`recvfrom(SOCK_BUFFER_SIZE)` recibe hasta 1024 bytes (`config.py`): 7 de header
+y hasta 1017 de mensaje. Un mensaje más largo se corta.
 
 El loop termina con `Ctrl+C` (`KeyboardInterrupt`), que cierra el socket.
 
@@ -332,15 +363,18 @@ El loop termina con `Ctrl+C` (`KeyboardInterrupt`), que cierra el socket.
 - Probado con Python 3.15.2 en macOS. Requiere Python 3.13 o superior.
 - Solo usa la biblioteca estándar: `socket`, `sys`, `ctypes`, `dataclasses`,
   `ipaddress`, `itertools`, `pathlib`, `typing` y `collections.abc`. Las pruebas
-  también usan `os`, `signal` y `time`.
+  también usan `os`, `signal`, `subprocess` y `time`.
 - `test_network.py` usa `os.fork`, que solo existe en sistemas tipo Unix.
 
 
 ### Configuración y ejecución
 
-Las tablas de rutas están en `routes/`. `config.py` define esa carpeta como
-`ROUTES_PATH`, así que `router.py` recibe solo el nombre del archivo. Cada línea
-tiene el formato:
+`config.py` tiene la configuración de los routers:
+- `ROUTES_PATH`: carpeta de las tablas de rutas (`routes/`). Por eso
+  `router.py` recibe solo el nombre del archivo.
+- `SOCK_BUFFER_SIZE = 1024`: bytes máximos que recibe un router por paquete.
+
+Cada línea de una tabla de rutas tiene el formato:
 
 ```text
 <red>/<prefijo> <puerto_inicial> <puerto_final> <ip_siguiente_salto> <puerto_siguiente_salto>
@@ -358,6 +392,12 @@ En una tercera terminal, para enviar un mensaje:
 
 ```bash
 python3 -m packet.send 127.0.0.1 8882 "hola R2!" 127.0.0.1 8881
+```
+
+O, para enviar un archivo línea por línea:
+
+```bash
+python3 prueba_router.py 127.0.0.1 8882 10 127.0.0.1 8881 < mensajes.txt
 ```
 
 Para correr todas las pruebas:
@@ -389,6 +429,8 @@ con `send` y detiene los routers con `SIGINT`:
 | `round_robin_2` | Parte I, paso 8, Test 2 | Con R0 y R6, R2 cicla por separado en cada área (R1 → R5 y R5 → R1 intercalados). |
 | `default_router` | Parte I, paso 9 | Destinos fuera de la red terminan en el router default. |
 | `ttl_drop` | Parte II, pasos 2 y 3 | En el ejemplo 2, de R1 a R3: con TTL 1 lo descarta R2, con TTL 2 lo descarta R3 y con TTL 3 llega. |
+| `bad_routes`, `hops_5_routers`, `hops_7_routers` | Pruebas sin TTL | Ver [Pruebas Mini-Internet sin TTL](#pruebas-mini-internet-sin-ttl). |
+| `bad_routes_ttl`, `file_order` | Pruebas con TTL | Ver [Pruebas Mini-Internet con TTL](#pruebas-mini-internet-con-ttl). |
 
 Para correr una sola:
 
@@ -537,6 +579,55 @@ Archivos de rutas creados para esta red:
 127.0.0.1/24 8883 8885 127.0.0.1 8883
 127.0.0.1/24 8883 8885 127.0.0.1 8882
 ```
+
+#### Pruebas Mini-Internet con TTL
+
+Estas pruebas usan el código actual. Desde `Actividad-5/`:
+
+```bash
+PYTHONUNBUFFERED=1 python3 -c "import test_network as t; t.bad_routes_ttl()"
+PYTHONUNBUFFERED=1 python3 -c "import test_network as t; t.file_order()"
+```
+
+**1. Tabla de rutas de `R2` mal configurada, con TTL 10.** Es la misma prueba 1
+sin TTL (`rutas_R2_v2_error.txt`), pero los paquetes salen con TTL 10.
+
+- El paquete de `R3` a `R1` llega igual que antes (`R3 → R2 → R1`).
+- El paquete de `R1` a `R3` sigue sin llegar y rebota entre `R1` y `R2`, pero
+  ahora cada router le resta 1 al TTL. Después de 10 saltos llega a `R1` con
+  TTL 0 y `R1` lo descarta:
+  `Se recibió paquete 127.0.0.1;8883;0;hola R3! con TTL 0`.
+
+La diferencia es que, sin TTL, el paquete circulaba hasta que se detenían los
+routers. Con TTL el ciclo dura como máximo 10 saltos. El error de la tabla
+sigue ahí, pero el paquete perdido ya no carga la red para siempre.
+
+El resultado de este experimento se encuentra en `bad_routers_ttl.txt`.
+
+**2. Orden de los paquetes en la red de 5 routers.** Con las tablas
+`rutas_R{1..5}_v3.txt`, `prueba_router.py` envía las 30 líneas de `mensajes.txt`
+de `R1` a `R5` con TTL 10. `R5` recibió 28, en este orden:
+
+```text
+03 07 11 04 15 08 12 19 16 20 01 23 26 27 29 02 13 06 21 14 24 25 30 09 18 22 17 10
+```
+
+- **Los paquetes llegan desordenados.** Como se envían seguidos, varios están
+  en la red al mismo tiempo. Round-robin los manda por caminos de distinto
+  largo: los que llegaron dieron 3, 5, 7 o 9 saltos. Un paquete que sale
+  después, pero toma un camino más corto, llega antes. Por ejemplo, el mensaje
+  01 dio 5 saltos y llegó en el lugar 11.
+- **Se pierden paquetes.** Los mensajes 05 y 28 rebotaron entre `R2`, `R3` y
+  `R4` hasta agotar el TTL y se descartaron sin llegar a `R5`.
+- La capa de red no garantiza orden ni entrega. Reordenar y recuperar paquetes
+  le corresponde a una capa superior, como TCP.
+
+Como los paquetes se cruzan en los routers, el orden exacto puede cambiar entre
+ejecuciones.
+
+El resultado de este experimento se encuentra en `order_5_routers.txt`. Algunas
+líneas aparecen unidas, porque varios routers escriben al mismo tiempo en la
+misma salida.
 
 
 ### Uso de IA

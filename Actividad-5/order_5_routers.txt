@@ -1,0 +1,161 @@
+===== Pruebas con TTL 2: orden de paquetes en red de 5 routers =====
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 01 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 02 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 03 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 04 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 06 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 07 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 08 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 09 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 11 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 12 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 01 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 13 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 14 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 02 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 15 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 16 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 03 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 04 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 18 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 19 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 06 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 20 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 21 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 07 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 22 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 08 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 01 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)redirigiendo paquete 127.0.0.1;8885;10;mensaje 23 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 09 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 24 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 25 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)redirigiendo paquete 127.0.0.1;8885;9;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 03 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 26 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 11 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 27 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 12 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)redirigiendo paquete 127.0.0.1;8885;8;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 29 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)redirigiendo paquete 127.0.0.1;8885;8;mensaje 02 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 13 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 07 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;10;mensaje 30 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 09 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 14 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+paquete recibido:mensaje 03 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 11 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 04 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)redirigiendo paquete 127.0.0.1;8885;9;mensaje 15 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 07 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 13 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+paquete recibido:mensaje 11 de 30
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 16 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+paquete recibido:mensaje 04 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 15 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+paquete recibido:mensaje 15 de 30
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)redirigiendo paquete 127.0.0.1;8885;8;mensaje 06 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 18 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 08 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 19 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 08 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 20 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 12 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 21 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 19 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 14 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+paquete recibido:mensaje 12 de 30
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 22 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+paquete recibido:mensaje 19 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 21 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 16 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+paquete recibido:mensaje 16 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 18 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 01 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 23 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)redirigiendo paquete 127.0.0.1;8885;8;mensaje 20 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 24 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)paquete recibido:mensaje 20 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 22 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 01 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 25 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 23 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+paquete recibido:mensaje 01 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 24 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)redirigiendo paquete 127.0.0.1;8885;9;mensaje 26 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 23 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 25 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 27 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 26 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 26 de 30
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 27 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 02 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 29 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+paquete recibido:mensaje 27 de 30
+redirigiendo paquete 127.0.0.1;8885;9;mensaje 30 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 29 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 02 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)redirigiendo paquete 127.0.0.1;8885;7;mensaje 09 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 13 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)paquete recibido:mensaje 29 de 30
+paquete recibido:mensaje 02 de 30
+redirigiendo paquete 127.0.0.1;8885;8;mensaje 30 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 06 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 13 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 09 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)paquete recibido:mensaje 13 de 30
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 06 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 14 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 06 de 30
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 21 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 18 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 21 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 14 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 22 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+paquete recibido:mensaje 21 de 30
+paquete recibido:mensaje 14 de 30
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 18 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)redirigiendo paquete 127.0.0.1;8885;7;mensaje 24 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 25 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 22 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 24 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;5;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 24 de 30
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 25 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)redirigiendo paquete 127.0.0.1;8885;7;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;7;mensaje 30 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 25 de 30
+redirigiendo paquete 127.0.0.1;8885;4;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;5;mensaje 09 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;6;mensaje 30 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;5;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;5;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+paquete recibido:mensaje 30 de 30
+redirigiendo paquete 127.0.0.1;8885;4;mensaje 09 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;5;mensaje 18 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 09 de 30
+redirigiendo paquete 127.0.0.1;8885;4;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;4;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;5;mensaje 22 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;4;mensaje 18 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;3;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 18 de 30
+redirigiendo paquete 127.0.0.1;8885;5;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)redirigiendo paquete 127.0.0.1;8885;4;mensaje 22 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+paquete recibido:mensaje 22 de 30
+redirigiendo paquete 127.0.0.1;8885;3;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;4;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;2;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;3;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;2;mensaje 17 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+redirigiendo paquete 127.0.0.1;8885;3;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+paquete recibido:mensaje 17 de 30
+redirigiendo paquete 127.0.0.1;8885;2;mensaje 10 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)redirigiendo paquete 127.0.0.1;8885;1;mensaje 05 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+paquete recibido:mensaje 10 de 30
+Se recibió paquete 127.0.0.1;8885;0;mensaje 05 de 30 con TTL 0
+redirigiendo paquete 127.0.0.1;8885;2;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;1;mensaje 28 de 30 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+Se recibió paquete 127.0.0.1;8885;0;mensaje 28 de 30 con TTL 0

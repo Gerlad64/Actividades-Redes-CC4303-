@@ -1,0 +1,17 @@
+===== Pruebas con TTL 1: tabla de R2 mal configurada, TTL=10 =====
+>>> enviando 127.0.0.1;8881;10;hola R1! a (127.0.0.1, 8883)
+redirigiendo paquete 127.0.0.1;8881;10;hola R1! con destino final ('127.0.0.1', 8881) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8881;9;hola R1! con destino final ('127.0.0.1', 8881) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881)
+paquete recibido:hola R1!
+>>> enviando 127.0.0.1;8883;10;hola R3! a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8883;10;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8883;9;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881)
+redirigiendo paquete 127.0.0.1;8883;8;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8883;7;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881)
+redirigiendo paquete 127.0.0.1;8883;6;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8883;5;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881)
+redirigiendo paquete 127.0.0.1;8883;4;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8883;3;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881)
+redirigiendo paquete 127.0.0.1;8883;2;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8883;1;hola R3! con destino final ('127.0.0.1', 8883) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881)
+Se recibió paquete 127.0.0.1;8883;0;hola R3! con TTL 0
