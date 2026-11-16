@@ -25,7 +25,7 @@ class Packet(ctypes.BigEndianStructure):
     def ADDR(self) -> tuple[str, int]:
         return (socket.inet_ntoa(self.IP.to_bytes(4, byteorder='big')), self.PORT)
     
-    def __init__(self, ip: int, port: int, msg: bytes = b'', ttl: int = 0) -> None:
+    def __init__(self, ip: int, port: int, msg: bytes = b'', ttl: int = 64) -> None:
         super().__init__(ip, port, ttl)
         self.msg: bytes = msg
     
