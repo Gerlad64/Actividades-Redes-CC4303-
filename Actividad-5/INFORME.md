@@ -17,8 +17,8 @@
 | `routes/` | Tablas de rutas (`rutas_Rn_vk.txt`). |
 | `test_network.py` | Pruebas: levanta los routers con `fork` y les envía paquetes. |
 | `mensajes.txt` | Archivo de 30 líneas que se envía con `prueba_router.py`. |
-| `bad_routers.txt`, `hops_5_routers.txt`, `hops_7_routers.txt` | Salidas de las pruebas sin TTL. |
-| `bad_routers_ttl.txt`, `order_5_routers.txt` | Salidas de las pruebas con TTL. |
+| `results/`: `bad_routers.txt`, `hops_5_routers.txt`, `hops_7_routers.txt` | Salidas de las pruebas sin TTL. |
+| `results/`: `bad_routers_ttl.txt`, `order_5_routers.txt` | Salidas de las pruebas con TTL. |
 
 Un router se levanta con:
 
@@ -484,7 +484,7 @@ En las tablas siguientes, un salto es un envío entre dos routers.
 Sin TTL, un error en una sola tabla basta para que un paquete quede circulando
 para siempre y cargue la red.
 
-El resultado de este experimento se encuentra en `bad_routers.txt`.
+El resultado de este experimento se encuentra en `results/bad_routers.txt`.
 
 **2. Red de 5 routers (`rutas_R{1..5}_v3.txt`), 6 paquetes de `R1` a `R5`.**
 
@@ -502,7 +502,7 @@ El resultado de este experimento se encuentra en `bad_routers.txt`.
   `R1 → R2 → R4 → R5`). La mitad de los paquetes usa el camino mínimo y la otra
   mitad da más del doble de saltos.
 
-El resultado de este experimento se encuentra en `hops_5_routers.txt`.
+El resultado de este experimento se encuentra en `results/hops_5_routers.txt`.
 
 **3. Red de 7 routers del Test 2 del paso 8 (`rutas_R{0..6}_v4.txt`), 6 paquetes
 de `R1` a `R5`.**
@@ -524,7 +524,7 @@ acorta el camino (`R1 → R2 → R6 → R3 → R5` son 4). Solo 1 de los 6 paque
 logra. Agregar routers y caminos alternativos sin TTL aumenta los saltos
 innecesarios.
 
-El resultado de este experimento se encuentra en `hops_7_routers.txt`.
+El resultado de este experimento se encuentra en `results/hops_7_routers.txt`.
 
 Archivos de rutas creados para esta red:
 
@@ -602,7 +602,7 @@ La diferencia es que, sin TTL, el paquete circulaba hasta que se detenían los
 routers. Con TTL el ciclo dura como máximo 10 saltos. El error de la tabla
 sigue ahí, pero el paquete perdido ya no carga la red para siempre.
 
-El resultado de este experimento se encuentra en `bad_routers_ttl.txt`.
+El resultado de este experimento se encuentra en `results/bad_routers_ttl.txt`.
 
 **2. Orden de los paquetes en la red de 5 routers.** Con las tablas
 `rutas_R{1..5}_v3.txt`, `prueba_router.py` envía las 30 líneas de `mensajes.txt`
@@ -625,7 +625,7 @@ de `R1` a `R5` con TTL 10. `R5` recibió 28, en este orden:
 Como los paquetes se cruzan en los routers, el orden exacto puede cambiar entre
 ejecuciones.
 
-El resultado de este experimento se encuentra en `order_5_routers.txt`. Algunas
+El resultado de este experimento se encuentra en `results/order_5_routers.txt`. Algunas
 líneas aparecen unidas, porque varios routers escriben al mismo tiempo en la
 misma salida.
 
