@@ -15,7 +15,6 @@ def network(router_ip: str, router_port: int, router_routes: str) -> None:
     table = RouterTable(ROUTES_PATH / router_routes)
 
     sock.bind((router_ip, router_port))
-    print(BANNER)
     while True:
         try:
             msg, _ = sock.recvfrom(16)
@@ -23,7 +22,7 @@ def network(router_ip: str, router_port: int, router_routes: str) -> None:
             packet_str = f"{packet.ADDR[0]};{packet.ADDR[1]};{packet.msg.decode()}"
             if packet.ADDR == router_addr:
                 m = packet.msg.decode()
-                print("paquete recibido:" + m[:5] + ("..." if len(m) > 5 else ""))
+                print("paquete recibido:" + m)
             elif (next_hop := table.check(packet.ADDR)) is not None:
                 packet.sendto(sock, *next_hop)
                 print(f"redirigiendo paquete {packet_str} con destino final {packet.ADDR} desde {router_addr} hacia {next_hop}")
@@ -37,4 +36,5 @@ def network(router_ip: str, router_port: int, router_routes: str) -> None:
 
 
 if __name__ == '__main__':
+    print(BANNER)
     network(sys.argv[1], int(sys.argv[2]), sys.argv[3])
