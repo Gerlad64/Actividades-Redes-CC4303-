@@ -632,4 +632,7 @@ misma salida.
 
 ### Uso de IA
 
-[completar]
+En esta actividad se experimentó con el uso de agentes de IA, por lo que se incluyó el 
+archivo `AGENTS.md` en la raíz del proyecto. Los agentes ayudaron a escribir código y documentación
+de manera más rápida, aún así, siempre bajo mi guía, con mi aprobación y entendimiento y siguiendo el diseño que
+más me acomoda.
