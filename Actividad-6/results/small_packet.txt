@@ -1,0 +1,39 @@
+
+===== Informe 1: TTL, round-robin y paquetes sin fragmentar =====
+
+>>> enviando 127.0.0.1;8885;10;347;0;5;0;hola! a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;10;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 100)
+redirigiendo paquete 127.0.0.1;8885;9;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8885;8;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8885;7;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884) en 1 fragmento(s) (MTU 80)
+redirigiendo paquete 127.0.0.1;8885;6;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 80)
+redirigiendo paquete 127.0.0.1;8885;5;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8885;4;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885) en 1 fragmento(s) (MTU 55)
+paquete recibido:hola!
+
+>>> enviando 127.0.0.1;8885;10;347;0;5;0;hola! a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;10;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 100)
+redirigiendo paquete 127.0.0.1;8885;9;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884) en 1 fragmento(s) (MTU 80)
+redirigiendo paquete 127.0.0.1;8885;8;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885) en 1 fragmento(s) (MTU 140)
+paquete recibido:hola!
+
+>>> enviando 127.0.0.1;8885;10;347;0;5;0;hola! a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;10;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 100)
+redirigiendo paquete 127.0.0.1;8885;9;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8885;8;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8885;7;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884) en 1 fragmento(s) (MTU 80)
+redirigiendo paquete 127.0.0.1;8885;6;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 80)
+redirigiendo paquete 127.0.0.1;8885;5;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8885;4;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885) en 1 fragmento(s) (MTU 55)
+paquete recibido:hola!
+
+>>> enviando 127.0.0.1;8885;10;347;0;5;0;hola! a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;10;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 100)
+redirigiendo paquete 127.0.0.1;8885;9;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884) en 1 fragmento(s) (MTU 80)
+redirigiendo paquete 127.0.0.1;8885;8;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885) en 1 fragmento(s) (MTU 140)
+paquete recibido:hola!
+
+>>> enviando 127.0.0.1;8885;2;347;0;5;0;hola! a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;2;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 100)
+redirigiendo paquete 127.0.0.1;8885;1;347;0;5;0;hola! con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883) en 1 fragmento(s) (MTU 50)
+Se recibió paquete 127.0.0.1;8885;0;347;0;5;0;hola! con TTL 0

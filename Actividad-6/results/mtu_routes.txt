@@ -1,0 +1,26 @@
+
+===== Paso 2: tablas de rutas con MTU =====
+
+>>> enviando 127.0.0.1;8882;64;0;0;8;0;hola R2! a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8882;64;0;0;8;0;hola R2! con destino final ('127.0.0.1', 8882) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 100)
+paquete recibido:hola R2!
+
+>>> enviando 127.0.0.1;8881;64;0;0;8;0;hola R1! a (127.0.0.1, 8882)
+redirigiendo paquete 127.0.0.1;8881;64;0;0;8;0;hola R1! con destino final ('127.0.0.1', 8881) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881) en 1 fragmento(s) (MTU 100)
+paquete recibido:hola R1!
+
+>>> enviando 127.0.0.1;8884;64;0;0;8;0;hola R4! a (127.0.0.1, 8883)
+redirigiendo paquete 127.0.0.1;8884;64;0;0;8;0;hola R4! con destino final ('127.0.0.1', 8884) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8884;63;0;0;8;0;hola R4! con destino final ('127.0.0.1', 8884) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8884;62;0;0;8;0;hola R4! con destino final ('127.0.0.1', 8884) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885) en 1 fragmento(s) (MTU 55)
+redirigiendo paquete 127.0.0.1;8884;61;0;0;8;0;hola R4! con destino final ('127.0.0.1', 8884) desde ('127.0.0.1', 8885) hacia ('127.0.0.1', 8884) en 1 fragmento(s) (MTU 140)
+paquete recibido:hola R4!
+
+>>> enviando 127.0.0.1;8881;64;0;0;8;0;hola R1! a (127.0.0.1, 8885)
+redirigiendo paquete 127.0.0.1;8881;64;0;0;8;0;hola R1! con destino final ('127.0.0.1', 8881) desde ('127.0.0.1', 8885) hacia ('127.0.0.1', 8883) en 1 fragmento(s) (MTU 55)
+redirigiendo paquete 127.0.0.1;8881;63;0;0;8;0;hola R1! con destino final ('127.0.0.1', 8881) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882) en 1 fragmento(s) (MTU 50)
+redirigiendo paquete 127.0.0.1;8881;62;0;0;8;0;hola R1! con destino final ('127.0.0.1', 8881) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8881) en 1 fragmento(s) (MTU 100)
+paquete recibido:hola R1!
+
+>>> enviando 127.0.0.1;8889;64;0;0;8;0;sin ruta a (127.0.0.1, 8881)
+No hay rutas hacia ('127.0.0.1', 8889) para paquete 127.0.0.1;8889;64;0;0;8;0;sin ruta

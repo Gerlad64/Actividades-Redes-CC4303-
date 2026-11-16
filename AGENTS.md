@@ -3,14 +3,14 @@
 ## Context
 Repository for the activities of the "Redes" (Networking) course. Each activity (`Actividad-N/`) is a simplified implementation of an Internet protocol, driven by a use case (e.g., an HTTP proxy with the minimum set of required headers).
 
-**Current activity: 5** (update when starting each activity)
+**Current activity: 6** (update when starting each activity)
 
 Each activity may include an optional `CONTEXT.md` that comes before `ENUNCIADO.md` and holds background and instructions important for the activity. Before writing code, read `CONTEXT.md` if it exists, then `ENUNCIADO.md`.
 
 These are simplified versions: write the minimum code needed to pass the tests defined in the activity statement. Do not add robustness or features that were not requested.
 
 ## Boundaries
-- Work only inside `Actividad-N/`. Do not read or modify other activities, especially delivered ones.
+- Work only inside `Actividad-N/`. Unless you're told to, do not read or modify other activities, especially delivered ones.
 - `CONTEXT.md` is read-only.
 - `ENUNCIADO.md` is read-only.
 
