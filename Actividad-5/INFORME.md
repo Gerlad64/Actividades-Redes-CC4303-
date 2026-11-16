@@ -189,3 +189,149 @@ red, sin pasar por el default.
 
 En esta versión se utilizan rangos de puertos en lugar de rangos de IP para simular
 routers, ya que todo se trabaja de manera local y no existen interfaces de red
+
+
+### Pruebas
+
+#### Pruebas Mini-Internet sin TTL
+
+Estas pruebas se ejecutaron sobre el código del tag `Actividad-5-Parte-I`, que no
+tiene TTL. Con el código actual (TTL 64 por defecto) la prueba 1 cambia: el ciclo
+se corta a los 64 saltos. Las pruebas 2 y 3 no cambian, porque ningún paquete da
+más de 10 saltos.
+
+Las funciones están en `test_network.py` (`bad_routes`, `hops_5_routers` y
+`hops_7_routers`). Para reproducirlas sin TTL, **desde la raíz del repositorio**:
+
+```bash
+mkdir /tmp/parte1 && git archive Actividad-5-Parte-I Actividad-5 | tar -x -C /tmp/parte1
+cp Actividad-5/test_network.py /tmp/parte1/Actividad-5/
+cp Actividad-5/routes/rutas_R2_v2_error.txt /tmp/parte1/Actividad-5/routes/
+cd /tmp/parte1/Actividad-5
+PYTHONUNBUFFERED=1 python3 -c "import test_network as t; t.bad_routes()"
+PYTHONUNBUFFERED=1 python3 -c "import test_network as t; t.hops_5_routers()"
+PYTHONUNBUFFERED=1 python3 -c "import test_network as t; t.hops_7_routers()"
+```
+
+Los primeros 4 comandos de bash configura una carpeta con la actividad en un momento
+donde `ttl` todavía no estaba implementado. Este momento esta marcado mediante el tag
+de git `Actividad-5-Parte-I`.
+
+`PYTHONUNBUFFERED=1` hace que cada router imprima apenas recibe un paquete, así
+las líneas salen en el orden real de los saltos.
+
+En las tablas siguientes, un salto es un envío entre dos routers.
+
+**1. Tabla de rutas de `R2` mal configurada.** En la red del ejemplo 2, `R2` usa
+`routes/rutas_R2_v2_error.txt`:
+
+```text
+127.0.0.1/24 8881 8881 127.0.0.1 8881
+127.0.0.1/24 8883 8883 127.0.0.1 8881
+```
+
+- Un paquete de `R3` a `R1` llega normal (`R3 -> R2 -> R1`), porque la primera
+  línea sigue correcta.
+- Un paquete de `R1` a `R3` nunca llega. `R1` lo envía a `R2`, y `R2` lo
+  devuelve a `R1` por la segunda línea. El paquete rebota entre `R1` y `R2`
+  hasta que se detienen los routers.
+
+Sin TTL, un error en una sola tabla basta para que un paquete quede circulando
+para siempre y cargue la red.
+
+El resultado de este experimento se encuentra en `bad_routers.txt`.
+
+**2. Red de 5 routers (`rutas_R{1..5}_v3.txt`), 6 paquetes de `R1` a `R5`.**
+
+| Paquete | Saltos | Camino |
+| :--- | :---: | :--- |
+| #0, #2, #4 | 7 | R1 → R2 → R3 → R2 → R4 → R2 → R3 → R5 |
+| #1, #3, #5 | 3 | R1 → R2 → R4 → R5 |
+
+- **¿Cuántos saltos dan?** 7 o 3. Los 6 paquetes llegan a `R5`.
+- **¿Siempre la misma cantidad?** No, se alternan 7 y 3. `R3` y `R4` alternan
+  entre `R2` y `R5` para llegar a `R5`, así que la mitad de las veces devuelven
+  el paquete a `R2`. El patrón se repite porque el estado de round-robin de cada
+  router lo comparten todos los paquetes que pasan por él.
+- **¿Comparado con el mínimo?** El mínimo es 3 saltos (`R1 → R2 → R3 → R5` o
+  `R1 → R2 → R4 → R5`). La mitad de los paquetes usa el camino mínimo y la otra
+  mitad da más del doble de saltos.
+
+
+El resultado de este experimento se encuentra en `hops_5_routers.txt`.
+
+**3. Red de 7 routers del Test 2 del paso 8 (`rutas_R{0..6}_v4.txt`), 6 paquetes
+de `R1` a `R5`.**
+
+| Paquete | Saltos | Camino |
+| :--- | :---: | :--- |
+| #0 | 8 | R1 → R2 → R3 → R2 → R4 → R2 → R6 → R3 → R5 |
+| #1 | 5 | R1 → R2 → R3 → R2 → R4 → R5 |
+| #2 | 5 | R1 → R2 → R6 → R2 → R3 → R5 |
+| #3 | 8 | R1 → R2 → R4 → R2 → R6 → R3 → R2 → R3 → R5 |
+| #4 | 3 | R1 → R2 → R4 → R5 |
+| #5 | 10 | R1 → R2 → R6 → R2 → R3 → R2 → R4 → R2 → R6 → R3 → R5 |
+
+Los 6 paquetes llegan, pero la cantidad de saltos varía más que en la red de 5
+routers (de 3 a 10) y no se ve un patrón corto. Ahora `R2` alterna entre 3
+caminos hacia `R5` (`R3`, `R4` y `R6`), y `R3`, `R4` y `R6` también pueden
+devolver el paquete a `R2`. El mínimo sigue siendo 3 saltos, porque `R6` no
+acorta el camino (`R1 → R2 → R6 → R3 → R5` son 4). Solo 1 de los 6 paquetes lo
+logra. Agregar routers y caminos alternativos sin TTL aumenta los saltos
+innecesarios.
+
+El resultado de este experimento se encuentra en `hops_7_routers.txt`.
+
+Archivos de rutas creados para esta red:
+
+```text
+# archivo rutas_R0_v4.txt
+127.0.0.1/24 8881 8881 127.0.0.1 8881
+127.0.0.1/24 8882 8886 127.0.0.1 8882
+```
+
+```text
+# archivo rutas_R1_v4.txt
+127.0.0.1/24 8880 8880 127.0.0.1 8880
+127.0.0.1/24 8882 8886 127.0.0.1 8882
+```
+
+```text
+# archivo rutas_R2_v4.txt
+127.0.0.1/24 8880 8881 127.0.0.1 8881
+127.0.0.1/24 8880 8881 127.0.0.1 8880
+127.0.0.1/24 8883 8886 127.0.0.1 8883
+127.0.0.1/24 8883 8886 127.0.0.1 8884
+127.0.0.1/24 8883 8886 127.0.0.1 8886
+```
+
+```text
+# archivo rutas_R3_v4.txt
+127.0.0.1/24 8880 8882 127.0.0.1 8882
+127.0.0.1/24 8880 8882 127.0.0.1 8886
+127.0.0.1/24 8884 8885 127.0.0.1 8882
+127.0.0.1/24 8884 8885 127.0.0.1 8885
+127.0.0.1/24 8886 8886 127.0.0.1 8886
+```
+
+```text
+# archivo rutas_R4_v4.txt
+127.0.0.1/24 8880 8883 127.0.0.1 8882
+127.0.0.1/24 8880 8883 127.0.0.1 8885
+127.0.0.1/24 8885 8886 127.0.0.1 8882
+127.0.0.1/24 8885 8886 127.0.0.1 8885
+```
+
+```text
+# archivo rutas_R5_v4.txt
+127.0.0.1/24 8880 8884 127.0.0.1 8884
+127.0.0.1/24 8880 8884 127.0.0.1 8883
+127.0.0.1/24 8886 8886 127.0.0.1 8883
+```
+
+```text
+# archivo rutas_R6_v4.txt
+127.0.0.1/24 8880 8882 127.0.0.1 8882
+127.0.0.1/24 8883 8885 127.0.0.1 8883
+127.0.0.1/24 8883 8885 127.0.0.1 8882
+```

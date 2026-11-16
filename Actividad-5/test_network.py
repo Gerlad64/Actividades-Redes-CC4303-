@@ -133,6 +133,48 @@ def default_router() -> None:
     stop_routers(pids)
 
 
+def bad_routes() -> None:
+    """Pruebas sin TTL, prueba 1: ejemplo 2 con la tabla de R2 mal configurada (8883 se envía a R1).
+    El paquete de R1 a R3 queda rebotando entre R1 y R2; el de R3 a R1 llega normal.
+    Tablas de rutas:
+        R1 (8881): rutas_R1_v2.txt
+        R2 (8882): rutas_R2_v2_error.txt
+        R3 (8883): rutas_R3_v2.txt
+    """
+    print("\n===== Pruebas sin TTL 1: tabla de R2 mal configurada =====", flush=True)
+    pids = start_routers([
+        (8881, "rutas_R1_v2.txt"),
+        (8882, "rutas_R2_v2_error.txt"),
+        (8883, "rutas_R3_v2.txt"),
+    ])
+    send(IP, 8881, "hola R1!", IP, 8883)
+    send(IP, 8883, "hola R3!", IP, 8881)
+    stop_routers(pids)
+
+
+def hops_5_routers() -> None:
+    """Pruebas sin TTL, prueba 2: red de 5 routers. Envía 6 paquetes de R1 a R5 para contar sus saltos.
+    Tablas de rutas: rutas_R{1..5}_v3.txt
+    """
+    print("\n===== Pruebas sin TTL 2: saltos en red de 5 routers =====", flush=True)
+    pids = start_routers([(8880 + i, f"rutas_R{i}_v3.txt") for i in range(1, 6)])
+    for i in range(6):
+        send(IP, 8885, f"R1->R5 #{i}", IP, 8881)
+    stop_routers(pids)
+
+
+def hops_7_routers() -> None:
+    """Pruebas sin TTL, prueba 3: red de 7 routers del Test 2 del paso 8. Envía 6 paquetes de R1 a R5
+    para contar sus saltos.
+    Tablas de rutas: rutas_R{0..6}_v4.txt
+    """
+    print("\n===== Pruebas sin TTL 3: saltos en red de 7 routers =====", flush=True)
+    pids = start_routers([(8880 + i, f"rutas_R{i}_v4.txt") for i in range(7)])
+    for i in range(6):
+        send(IP, 8885, f"R1->R5 #{i}", IP, 8881)
+    stop_routers(pids)
+
+
 def ttl_drop() -> None:
     """Parte II, pasos 2 y 3: red de 3 routers del ejemplo 2 (R1 <-> R2 <-> R3).
     Un paquete con TTL=1 de R1 a R3 sale de R1 con TTL=0 y R2 lo descarta.
@@ -160,4 +202,7 @@ if __name__ == "__main__":
     round_robin_1()
     round_robin_2()
     default_router()
+    bad_routes()
+    hops_5_routers()
+    hops_7_routers()
     ttl_drop()

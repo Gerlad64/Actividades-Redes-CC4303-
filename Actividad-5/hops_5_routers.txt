@@ -1,0 +1,43 @@
+===== Pruebas sin TTL 2: saltos en red de 5 routers =====
+>>> enviando 127.0.0.1;8885;R1->R5 #0 a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #0 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #0 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #0 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #0 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #0 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #0 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #0 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+paquete recibido:R1->R...
+>>> enviando 127.0.0.1;8885;R1->R5 #1 a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #1 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #1 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #1 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+paquete recibido:R1->R...
+>>> enviando 127.0.0.1;8885;R1->R5 #2 a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #2 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #2 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #2 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #2 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #2 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #2 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #2 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+paquete recibido:R1->R...
+>>> enviando 127.0.0.1;8885;R1->R5 #3 a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #3 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #3 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #3 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+paquete recibido:R1->R...
+>>> enviando 127.0.0.1;8885;R1->R5 #4 a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #4 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #4 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #4 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #4 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #4 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #4 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8883)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #4 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8883) hacia ('127.0.0.1', 8885)
+paquete recibido:R1->R...
+>>> enviando 127.0.0.1;8885;R1->R5 #5 a (127.0.0.1, 8881)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #5 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8881) hacia ('127.0.0.1', 8882)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #5 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8882) hacia ('127.0.0.1', 8884)
+redirigiendo paquete 127.0.0.1;8885;R1->R5 #5 con destino final ('127.0.0.1', 8885) desde ('127.0.0.1', 8884) hacia ('127.0.0.1', 8885)
+paquete recibido:R1->R...
