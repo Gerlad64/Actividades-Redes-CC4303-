@@ -423,8 +423,8 @@ con `send` y detiene los routers con `SIGINT`:
 
 | Función | Paso | Qué verifica |
 | :--- | :--- | :--- |
-| `example_1` | Parte I, paso 7 | Ejemplo 1 (R1 ↔ R2): *forwarding*, entrega local y destino sin ruta. |
-| `example_2` | Parte I, paso 7 | Ejemplo 2 (R1 ↔ R2 ↔ R3): lo mismo, con un salto intermedio. |
+| `example_1` | Parte I, paso 7 | Ejemplo 1 (R1 <-> R2): *forwarding*, entrega local y destino sin ruta. |
+| `example_2` | Parte I, paso 7 | Ejemplo 2 (R1 <-> R2 <-> R3): lo mismo, con un salto intermedio. |
 | `round_robin_1` | Parte I, paso 8, Test 1 | R2 cicla entre R3 y R4 para paquetes de R1 a R5. |
 | `round_robin_2` | Parte I, paso 8, Test 2 | Con R0 y R6, R2 cicla por separado en cada área (R1 → R5 y R5 → R1 intercalados). |
 | `default_router` | Parte I, paso 9 | Destinos fuera de la red terminan en el router default. |
