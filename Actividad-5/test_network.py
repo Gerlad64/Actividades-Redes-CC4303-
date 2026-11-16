@@ -133,9 +133,31 @@ def default_router() -> None:
     stop_routers(pids)
 
 
+def ttl_drop() -> None:
+    """Parte II, pasos 2 y 3: red de 3 routers del ejemplo 2 (R1 <-> R2 <-> R3).
+    Un paquete con TTL=1 de R1 a R3 sale de R1 con TTL=0 y R2 lo descarta.
+    Con TTL=2 R3 lo recibe con TTL=0 y también lo descarta; con TTL=3 llega a R3 (el TTL baja en 1 por salto).
+    Tablas de rutas:
+        R1 (8881): rutas_R1_v2.txt
+        R2 (8882): rutas_R2_v2.txt
+        R3 (8883): rutas_R3_v2.txt
+    """
+    print("\n===== Parte II: TTL (R1 <-> R2 <-> R3) =====", flush=True)
+    pids = start_routers([
+        (8881, "rutas_R1_v2.txt"),
+        (8882, "rutas_R2_v2.txt"),
+        (8883, "rutas_R3_v2.txt"),
+    ])
+    send(IP, 8883, "hola", IP, 8881, ttl=1)
+    send(IP, 8883, "hola", IP, 8881, ttl=2)
+    send(IP, 8883, "hola", IP, 8881, ttl=3)
+    stop_routers(pids)
+
+
 if __name__ == "__main__":
     example_1()
     example_2()
     round_robin_1()
     round_robin_2()
     default_router()
+    ttl_drop()
