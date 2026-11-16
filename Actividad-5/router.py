@@ -19,11 +19,14 @@ def network(router_ip: str, router_port: int, router_routes: str) -> None:
         try:
             msg, _ = sock.recvfrom(16)
             packet = Packet.from_bytes(msg)
-            packet_str = f"{packet.ADDR[0]};{packet.ADDR[1]};{packet.msg.decode()}"
-            if packet.ADDR == router_addr:
+            packet_str = f"{packet.ADDR[0]};{packet.ADDR[1]};{packet.TTL};{packet.msg.decode()}"
+            if packet.TTL == 0:
+                print(f"Se recibió paquete {packet_str} con TTL 0")
+            elif packet.ADDR == router_addr:
                 m = packet.msg.decode()
                 print("paquete recibido:" + m)
             elif (next_hop := table.check(packet.ADDR)) is not None:
+                packet.TTL -= 1
                 packet.sendto(sock, *next_hop)
                 print(f"redirigiendo paquete {packet_str} con destino final {packet.ADDR} desde {router_addr} hacia {next_hop}")
             else:
