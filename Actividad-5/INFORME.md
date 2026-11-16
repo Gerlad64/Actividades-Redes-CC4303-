@@ -60,6 +60,24 @@ entregue como un solo argumento. Además, `send` se puede importar desde otro
 código (`from packet.send import send`), como hace `test_network.py` para enviar
 paquetes a los routers creados con `fork`.
 
+**Parámetro `ttl` (Parte II):** en la Parte II se agregó a `send` el parámetro
+`ttl`, que se escribe en el byte de TTL del header. Si no se entrega, vale 64,
+el valor usado en *nix:
+
+```python
+def send(dst_ip: str, dst_port: int, msg: str, via_ip: str, via_port: int, ttl: int = 64) -> None:
+```
+
+Por línea de comandos va como sexto argumento opcional:
+
+```bash
+python3 -m packet.send 127.0.0.1 8883 hola 127.0.0.1 8881 1
+```
+
+El valor por defecto mantiene las pruebas de la Parte I sin cambios. Además,
+`Packet` usa `ttl=0` por defecto, por lo que sin este valor los routers
+descartarían todos los paquetes.
+
 #### Round-Robin
 
 El round-robin está en `RouterTable` (`router_table.py`). Cada entrada de la tabla
